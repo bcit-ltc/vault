@@ -1,0 +1,62 @@
+# Entities and groups: Identity source-of-truth
+entities:
+  ltc-admin:        # special userpass account for ltc-admin
+    metadata: { team: LTC, note: "admin service user" }
+    policies: []    # group memberships provide perms
+
+  metrics-user:
+    metadata: { team: metrics }
+    policies: [ admin-metrics ]
+
+  kyle-hunter:
+    metadata: { team: course-production }
+    policies: []    # inherits via course-production
+
+groups:
+  course-production:
+    type: internal
+    metadata: { version: "2" }
+    policies: []          # none specified in your file
+    members:
+      entities: [ kyle-hunter ]
+      groups:   [ ]
+
+  ltc:
+    type: internal
+    metadata: { version: "2" }
+    policies:
+      - default
+      - read-ltc-infrastructure-inventory
+      - private-team
+      - write-external
+    members:
+      entities: [ ltc-admin ]
+      groups:   [ course-production ]
+
+  admin:
+    type: internal
+    metadata: { version: "2" }
+    policies:
+      - admin-approle
+      - admin-apps
+      - admin-external
+      - admin-ltc-infrastructure
+      - admin-kubernetes
+      - admin-metrics
+      - admin-research
+      - admin-sops
+      - admin-system
+      - admin-tokens
+      - admin-transit
+      - write-userpass
+    members:
+      entities: [ ltc-admin ]
+      groups:   [ course-production ]
+
+aliases:
+  # Alias Vault identities to auth backends (mount paths).
+  entities:
+    - name: ltc-admin
+      mount_path: userpass
+      alias_name: ltc-admin
+  groups: []

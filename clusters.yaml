@@ -1,0 +1,32 @@
+# Kubernetes cluster configuration
+clusters:
+
+  # prod-01:
+  #   host: https://192.168.76.248:6443
+  #   current_env: web
+
+  # prod-02:
+  #   host: https://192.168.76.248:6443
+  #   current_env: review
+
+  prod-03:
+    host: https://prod-manager-01.ltc.bcit.ca:6443
+    current_env: stable
+
+  prod-04:
+    host: https://prod-manager-09.ltc.bcit.ca:6443
+    current_env: latest
+
+common_policies:
+- default
+- write-sops
+- read-ltc-infrastructure-ssl-certificates
+
+token_bound_cidrs:
+- 10.12.0.0/16
+- 10.42.0.0/16
+- 10.67.0.0/16
+- 142.232.0.0/16
+- 192.68.68.0/24
+
+token_ttl_seconds: 14400

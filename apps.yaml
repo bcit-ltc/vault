@@ -1,0 +1,8 @@
+# Application names for policy creation
+apps:
+  - course-workload-estimator
+  - infrastructure-documentation
+  - qcon-web
+
+# Create policies for this secrets engine
+acl_policy_mount: apps

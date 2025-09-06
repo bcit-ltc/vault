@@ -1,0 +1,51 @@
+# Configure kubernetes auth
+
+> <https://developer.hashicorp.com/validated-patterns/vault/vault-kubernetes-auth>
+
+A service account is required to authenticate with the kubernetes auth backend. The `vault-tokenauth` service account is created by the flux bootstrap init process (see the `flux` repo `init/README.md`). These steps retrieve the credentials to authenticate using this auth backend and them in the `certs-tokens` folder.
+
+## Requirements
+
+- Vault CLI (or curl and Vault documentation)
+- Kubernetes CLI
+- jq
+
+## Setup
+
+> eg. configuring the `prod-03` cluster.
+
+1. Set your cluster context
+
+    ```bash
+    kubectl config use-context prod-03
+    ```
+
+    - *context is one of `prod-01`, `prod-02`, `prod-03`, or `prod-04`. For authoritative assignment, see the [flux repo](https://github.com/bcit-ltc/flux) `clusters` path*
+
+1. Retrieve the `kubernetes_host` value.
+
+    ```bash
+    kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}'
+    ```
+
+1. Set this value in `clusters.yaml` (project root)
+
+1. Retrieve and store the `vault-tokenauth` token
+
+    ```bash
+    export SA_TOKEN=$(kubectl get secret -n vault-secrets-operator-system vault-tokenauth --output 'go-template={{ .data.token }}' | base64 --decode) && echo "$SA_TOKEN"
+    ```
+
+1. Retrieve and store the cluster's `ca.crt`
+
+    ```bash
+    export CA_PEM=$(kubectl get secret -n vault-secrets-operator-system vault-tokenauth --output 'go-template={{ index .data "ca.crt" }}' | base64 --decode) && printenv "$CA_PEM"
+    ```
+
+1. Store the cluster values as a secret in Vault
+
+    ```bash
+    vault kv put ltc-infrastructure/clusters/prod-03 ca_pem="$CA_PEM" token_reviewer_jwt="$SA_TOKEN"
+    ```
+
+Now the backend is prepared. Uncomment the module in `main.tf` (project root) and run `terraform apply`.

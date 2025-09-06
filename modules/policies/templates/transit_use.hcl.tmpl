@@ -1,0 +1,23 @@
+# Transit usage for ${mount}/${key} (least privilege)
+
+%{ if contains(allow, "encrypt") ~}
+path "${mount}/encrypt/${key}" { capabilities = ["create","update"] }
+%{ endif ~}
+
+%{ if contains(allow, "decrypt") ~}
+path "${mount}/decrypt/${key}" { capabilities = ["create","update"] }
+%{ endif ~}
+
+%{ if contains(allow, "rewrap") ~}
+path "${mount}/rewrap/${key}"  { capabilities = ["update"] }
+%{ endif ~}
+
+%{ if contains(allow, "sign") ~}
+path "${mount}/sign/${key}"    { capabilities = ["create","update"] }
+%{ endif ~}
+
+%{ if contains(allow, "verify") ~}
+path "${mount}/verify/${key}"  { capabilities = ["create","update"] }
+%{ endif ~}
+
+# No key listing, metadata reads, export, or admin granted here.

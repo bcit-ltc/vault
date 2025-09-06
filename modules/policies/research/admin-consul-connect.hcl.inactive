@@ -1,0 +1,21 @@
+# Existing PKI Mounts
+
+
+path "/sys/mounts" {
+  capabilities = [ "read" ]
+}
+path "/sys/mounts/pki-ltc" {
+  capabilities = [ "read" ]
+}
+path "/sys/mounts/pki-ltc/int" {
+  capabilities = [ "read" ]
+}
+path "/pki-ltc/" {
+  capabilities = [ "read" ]
+}
+path "/pki-ltc/root/sign-intermediate" {
+  capabilities = [ "update" ]
+}
+path "/pki-ltc/int/*" {
+  capabilities = [ "create", "read", "update", "delete", "list" ]
+}
