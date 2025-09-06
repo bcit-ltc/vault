@@ -12,7 +12,7 @@ This project deploys HashiCorp Vault resources and stores the remote state in Az
 
 ## Getting Started
 
-1. Login to Vault
+1. Login to Vault (VPN required)
 
 1. Run Terraform commands:
 

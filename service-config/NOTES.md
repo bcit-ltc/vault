@@ -1,6 +1,6 @@
 # Vault Service Info
 
-This path stores the Vault service config as a reference - it should match `/etc/vault.d/vault.hcl` on the server.
+This path stores the Vault service config as a reference - it should match `/etc/vault.d/vault.hcl` on the server with TLS and AWS KMS secret values filled-in.
 
 ## Service Information
 
