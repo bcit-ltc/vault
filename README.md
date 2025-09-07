@@ -14,26 +14,26 @@ This project deploys HashiCorp Vault resources and stores the state remotely in 
 
 ## Getting Started
 
-1. Clone this repo and install the requirements.
+Clone this repo and install the requirements.
 
-    > [!IMPORTANT]
-    > Modules should be applied incrementally.
-    > Start by commenting-out the following special modules in `main.tf`:
-    >
-    > - Mod 2: Identity and access management
-    > - Mod 3: Kubernetes mounts, backend config, and roles
-    > - Mod 4: AzureAD auth
-    >
-    > These modules have special requirements, and can be applied after an initial `terraform plan` and the required init secrets are loaded.
+> [!IMPORTANT]
+> Modules should be applied incrementally.
+> Start by commenting-out the following special modules in `main.tf`:
+>
+> - Mod 2: Identity and access management
+> - Mod 3: Kubernetes mounts, backend config, and roles
+> - Mod 4: AzureAD auth
+>
+> These modules have special requirements, and can be applied after an initial `terraform plan` and the required init secrets are loaded.
 
-    > [!NOTE]
-    > It is recommended to comment out the entire terraform block in `main.tf` until a local state is established.
-    >
-    > When an appropriate backend is configured, state can be migrated with:
-    >
-    > ```bash
-    > terraform init -migrate-state
-    > ```
+> [!NOTE]
+> It is recommended to comment out the entire terraform block in `main.tf` until a local state is established.
+>
+> When an appropriate backend is configured, state can be migrated with:
+>
+> ```bash
+> terraform init -migrate-state
+> ```
 
 1. Login to Vault
 
