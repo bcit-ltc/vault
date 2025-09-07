@@ -39,7 +39,7 @@ A service account is required to authenticate with the kubernetes auth backend. 
 1. Retrieve and store the cluster's `ca.crt`
 
     ```bash
-    export CA_PEM=$(kubectl get secret -n vault-secrets-operator-system vault-tokenauth --output 'go-template={{ index .data "ca.crt" }}' | base64 --decode) && printenv "$CA_PEM"
+    export CA_PEM=$(kubectl get secret -n vault-secrets-operator-system vault-tokenauth --output 'go-template={{ index .data "ca.crt" }}' | base64 --decode) && echo "$CA_PEM"
     ```
 
 1. Store the cluster values as a secret in Vault
