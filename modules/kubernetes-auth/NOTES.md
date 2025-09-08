@@ -6,8 +6,8 @@ A service account is required to authenticate with the kubernetes auth backend. 
 
 ## Requirements
 
-- Vault CLI (or curl and Vault documentation)
-- Kubernetes CLI
+- Vault CLI
+- Kubernetes CLI and cluster access
 - jq
 
 ## Setup

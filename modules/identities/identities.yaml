@@ -10,13 +10,13 @@ entities:
 
   kyle-hunter:
     metadata: { team: course-production }
-    policies: []    # inherits via course-production
+    policies: []
 
 groups:
   course-production:
     type: internal
     metadata: { version: "2" }
-    policies: []          # none specified in your file
+    policies: []
     members:
       entities: [ kyle-hunter ]
       groups:   [ ]
@@ -27,7 +27,7 @@ groups:
     policies:
       - default
       - read-ltc-infrastructure-inventory
-      - private-team
+      - private-team    # allows access to private team resources
       - write-external
     members:
       entities: [ ltc-admin ]
@@ -54,6 +54,7 @@ groups:
       groups:   [ course-production ]
 
 aliases:
+
   # Alias Vault identities to auth backends (mount paths).
   entities:
     - name: ltc-admin

@@ -3,23 +3,24 @@
 
 # HashiCorp Vault configured with Terraform
 
-This project deploys HashiCorp Vault resources and stores the state remotely in Azure Blob Storage.
+This project uses Terraform to deploy Vault resources; backend state is stored remotely in Azure blob storage.
 
 ## Prerequisites
 
 - Terraform >= 1.0
-- Azure subscription with permissions to create resources
-- Azure CLI
 - Vault CLI
-- Kubernetes CLI (for `modules/kubernetes-auth`)
+- Azure CLI for state storgage
+
+### Optional
+
+- if using OIDC auth, Azure app pre-configuration required
+- if using Kubernetes auth, Kubernetes CLI and cluster required
 
 ## Getting Started
 
-Clone this repo and install the requirements.
-
 > [!IMPORTANT]
 > Modules should be applied incrementally.
-> Start by commenting-out the following special modules in `main.tf`:
+> Start by commenting-out the following modules in `main.tf`:
 >
 > - Mod 2: Identity and access management
 > - Mod 3: Kubernetes mounts, backend config, and roles
@@ -30,7 +31,7 @@ Clone this repo and install the requirements.
 > [!NOTE]
 > It is recommended to comment out the entire terraform block in `main.tf` until a local state is established.
 >
-> When an appropriate backend is configured, state can be migrated with:
+> When a backend is configured, state can be migrated with:
 >
 > ```bash
 > terraform init -migrate-state
@@ -57,35 +58,41 @@ terraform apply
 
 ## Applying Special Modules
 
-1. Enable the `secrets` engine
+Start by enabling the `secrets` engine
 
-    ```bash
-    terraform apply -target=module.secrets.vault_mount.kv_mount -auto-approve
-    ```
+```bash
+terraform apply -target=module.secrets.vault_mount.kv_mount -auto-approve
+```
 
-1. Enable `modules/kubernetes-auth`
+### Identity module
 
-    1. Load required secrets
+This module sets up groups and entities based on the configuration in the module's `identities.yaml` file.
 
-        - cluster CA certificate
-        - service account token
+### Kubernetes auth
 
-            *See [modules/kubernetes-auth/NOTES.md](modules/kubernetes-auth/NOTES.md) for details.*
+> See [modules/kubernetes-auth/NOTES.md](modules/kubernetes-auth/NOTES.md).
 
-    1. Uncomment the module in `main.tf`
-    1. Plan and apply the config
+This module configures Kubernetes access to Vault based on the configuration in `clusters.yaml`.
 
-1. Enable `/modules/oidc-auth`
+1. Load the required secrets
 
-    1. Load required secrets
+    - cluster CA certificate
+    - service account token
 
-        - client_id
-        - client_secret
+1. Uncomment the module in `main.tf`
+1. Plan and apply the config
 
-            *See [modules/oidc-auth/NOTES.md](./modules/oidc-auth/NOTES.md) for details.*
+### OIDC auth
 
-    1. Uncomment the module in `main.tf`
-    1. Plan and apply the config
+> See [modules/oidc-auth/NOTES.md](./modules/oidc-auth/NOTES.md) for details.
+
+1. Load the required secrets
+
+    - client_id
+    - client_secret
+
+1. Uncomment the module in `main.tf`
+1. Plan and apply the config
 
 ## License
 
@@ -93,4 +100,4 @@ This Source Code Form is subject to the terms of the Mozilla Public License, v2.
 
 ## About
 
-Developed in 🇨🇦 Canada by [BCIT's](https://www.bcit.ca/) [Learning and Teaching Centre](https://www.bcit.ca/learning-teaching-centre/). [Contact Us](mailto:ltc_techops@bcit.ca).
+Developed in 🇨🇦 Canada by the [Learning and Teaching Centre](https://www.bcit.ca/learning-teaching-centre/) at [BCIT](https://www.bcit.ca/).
