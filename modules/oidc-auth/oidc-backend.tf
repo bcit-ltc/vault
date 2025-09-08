@@ -10,7 +10,7 @@ data "vault_generic_secret" "oidc_credentials" {
 resource "vault_jwt_auth_backend" "oidc" {
   path               = "oidc"
   type               = "oidc"
-  description        = "Authenticate to BCIT (OIDC/AzureAD)"
+  description        = "Authenticate to BCIT (AzureAD)"
 
   oidc_discovery_url = "https://login.microsoftonline.com/${var.tenant_id}/v2.0"
   oidc_client_id     = data.vault_generic_secret.oidc_credentials.data["client_id"]

@@ -4,7 +4,7 @@ resource "vault_jwt_auth_backend_role" "default" {
   backend               = vault_jwt_auth_backend.oidc.path   # creates explicit dependency
   role_type             = "oidc"
 
-  user_claim            = "upn"
+  user_claim            = "email"
   groups_claim          = "groups"
   allowed_redirect_uris = var.redirect_uris
 
