@@ -11,4 +11,8 @@
 # Local tfvars terraform.tfvars
 **/*.tfvars
 
+# Remove sensitive data
 **/*secrets.*
+
+# Remove research
+**/research/**
