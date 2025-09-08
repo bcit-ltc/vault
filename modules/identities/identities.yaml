@@ -1,25 +1,68 @@
-# Entities and groups: Identity source-of-truth
+# Identity source-of-truth
+
 entities:
-  ltc-admin:        # special userpass account for ltc-admin
+
+  # special userpass account for ltc-admin
+  ltc-admin:
     metadata: { team: LTC, note: "admin service user" }
-    policies: []    # group memberships provide perms
+    policies: []
 
   metrics-user:
-    metadata: { team: metrics }
+    metadata: {}
     policies: [ admin-metrics ]
 
   kyle-hunter:
-    metadata: { team: course-production }
+    metadata: {}
+    policies: []
+
+  arvin-rolos:
+    metadata: {}
+    policies: []
+
+  viresh-soedhwa:
+    metadata: {}
+    policies: []
+
+  diego-estevez-vilanova:
+    metadata: {}
+    policies: []
+
+  jason-chien:
+    metadata: {}
+    policies: []
+
+  lance-men:
+    metadata: {}
+    policies: []
+
+  steven-zeng:
+    metadata: {}
     policies: []
 
 groups:
   course-production:
     type: internal
-    metadata: { version: "2" }
+    metadata: { team: Course Production }
     policies: []
     members:
-      entities: [ kyle-hunter ]
-      groups:   [ ]
+      entities: [ kyle-hunter, arvin-rolos, viresh-soedhwa ]
+      groups:   []
+
+  virtual-simulation-multimedia:
+    type: internal
+    metadata: { team: VSM }
+    policies: []
+    members:
+      entities: [ jason-chien, lance-men, steven-zeng ]
+      groups:   []
+
+  educational-technology-services:
+    type: internal
+    metadata: { team: ETS }
+    policies: []
+    members:
+      entities: [ diego-estevez-vilanova ]
+      groups:   []
 
   ltc:
     type: internal
@@ -31,7 +74,7 @@ groups:
       - write-external
     members:
       entities: [ ltc-admin ]
-      groups:   [ course-production ]
+      groups:   [ course-production, virtual-simulation-multimedia, educational-technology-services ]
 
   admin:
     type: internal
@@ -53,9 +96,8 @@ groups:
       entities: [ ltc-admin ]
       groups:   [ course-production ]
 
+# Alias Vault identities to auth backends (mount paths).
 aliases:
-
-  # Alias Vault identities to auth backends (mount paths).
   entities:
     - name: ltc-admin
       mount_path: userpass
