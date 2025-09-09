@@ -3,12 +3,12 @@ approle_roles:
 
   read-external:
     token_policies:
-      - token-lookup-self
+      - default
       - read-external
 
   read-ltc-infrastructure-ssl-certificates:
     token_policies:
-      - token-lookup-self
+      - default
       - read-ltc-infrastructure-ssl-certificates
 
 token_ttl_seconds: 3600          # example: 1h

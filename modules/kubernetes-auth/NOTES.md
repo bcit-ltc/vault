@@ -45,7 +45,7 @@ A service account is required to authenticate with the kubernetes auth backend. 
 1. Store the cluster values as a secret in Vault
 
     ```bash
-    vault kv put ltc-infrastructure/clusters/prod-03 ca_pem="$CA_PEM" token_reviewer_jwt="$SA_TOKEN"
+    vault kv put -mount="ltc-infrastructure" "clusters/prod-03" ca_pem="$CA_PEM" token_reviewer_jwt="$SA_TOKEN"
     ```
 
-Now the backend is prepared. Uncomment the module in `main.tf` (project root) and run `terraform apply`.
+Now the backend is prepared. Run `terraform apply` to finish.

@@ -19,7 +19,7 @@ locals {
     # SOPS usage: prefer the least-privilege transit policy name
     "use-transit-gitops-key" = {
       period   = local.ttl_30d
-      policies = ["use-transit-gitops-key"]
+      policies = ["default", "use-transit-gitops-key"]
       cidrs    = local.bound_cidrs
     }
   }
@@ -31,7 +31,7 @@ resource "vault_token_auth_backend_role" "roles" {
 
   role_name            = each.key
   allowed_policies     = each.value.policies
-  disallowed_policies  = ["default"]   # keep tokens policy-scoped; no implicit 'default'
+  # disallowed_policies  = ["default"]   # keep tokens policy-scoped; no implicit 'default'
   orphan               = true          # no parent; avoids cascading revocation issues
   renewable            = true          # allow renewal (bounded by periodic semantics)
   token_period         = each.value.period

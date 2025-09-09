@@ -32,13 +32,3 @@ resource "vault_policy" "admin-approle-get-secretid" {
 path "auth/approle/role/+/secret-id"  { capabilities = [ "update" ] }
 EOT
 }
-
-# Allow approle to view its own token
-resource "vault_policy" "token-lookup-self" {
-  name   = "token-lookup-self"
-  policy = <<EOT
-## Token lookup
-#
-path "auth/token/lookup-self"   { capabilities = [ "read" ] }
-EOT
-}
