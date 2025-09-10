@@ -12,15 +12,19 @@ A service account is required to authenticate with the kubernetes auth backend. 
 
 ## Setup
 
-> eg. configuring the `prod-03` cluster.
-
-1. Set your cluster context
+1. Login to Vault
 
     ```bash
-    kubectl config use-context prod-03
+    vault login -method=oidc username={yourBCITEmail}
     ```
 
-    - *context is one of `prod-01`, `prod-02`, `prod-03`, or `prod-04`. For authoritative assignment, see the [flux repo](https://github.com/bcit-ltc/flux) `clusters` path*
+1. Set the cluster context
+
+    ```bash
+    export CLUSTER=cluster0X
+
+    kubectl config use-context ${CLUSTER}   # make sure your context matches your `~/.kube/config`
+    ```
 
 1. Retrieve the `kubernetes_host` value.
 
@@ -45,7 +49,7 @@ A service account is required to authenticate with the kubernetes auth backend. 
 1. Store the cluster values as a secret in Vault
 
     ```bash
-    vault kv put -mount="ltc-infrastructure" "clusters/prod-03" ca_pem="$CA_PEM" token_reviewer_jwt="$SA_TOKEN"
+    vault kv put -mount="ltc-infrastructure" "clusters/${CLUSTER}" ca_pem="$CA_PEM" token_reviewer_jwt="$SA_TOKEN"
     ```
 
-Now the backend is prepared. Run `terraform apply` to finish.
+Now the backend is prepared. Run `terraform apply` to configure Vault.

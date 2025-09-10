@@ -1,19 +1,17 @@
 # Kubernetes cluster configuration
+# - see https://developer.hashicorp.com/vault/docs/auth/kubernetes
+#
 clusters:
 
-  # prod-01:
-  #   host: https://192.168.76.248:6443
-  #   current_env: web
+  # cluster00:
+  #   host: https://admin-03.ltc.bcit.ca:6443
+  #   current_env: admin
 
-  # prod-02:
-  #   host: https://192.168.76.248:6443
-  #   current_env: review
-
-  prod-03:
+  cluster01:
     host: https://prod-manager-01.ltc.bcit.ca:6443
     current_env: stable
 
-  prod-04:
+  cluster03:
     host: https://prod-manager-09.ltc.bcit.ca:6443
     current_env: latest
 

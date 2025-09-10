@@ -1,21 +1,22 @@
 locals {
   envs = ["latest", "stable"]
 
-  li_services = {
+  infrastructure_services = {
 
     # Env-scoped
-    flux                    = { subpath = "flux/+",   envs = local.envs }
-    bcit-active-directory   = { subpath = "bcit-active-directory", envs = local.envs }
-    # keycloak              = { subpath = "keycloak/+",      envs = local.envs }
+    # bcit-active-directory   = { subpath = "bcit-active-directory", envs = local.envs }
+    # keycloak                = { subpath = "keycloak/+",      envs = local.envs }
+    # aws-credentials         = { subpath = "aws-credentials", envs = local.envs }
 
     # Non-env
-    inventory               = { subpath = "inventory",         envs = [] }
-    ssl-certificates        = { subpath = "ssl-certificates",  envs = [] }
+    flux                    = { subpath = "flux",             envs = [] }
+    inventory               = { subpath = "inventory",        envs = [] }
+    ssl-certificates        = { subpath = "ssl-certificates", envs = [] }
   }
 
-  li_env_policies = {
+  infrastructure_env_policies = {
     for combo in flatten([
-      for svc_name, svc in local.li_services : length(svc.envs) > 0 ? [
+      for svc_name, svc in local.infrastructure_services : length(svc.envs) > 0 ? [
         for env in svc.envs : {
           name = "read-ltc-infrastructure-${svc_name}-${env}"
           sub  = svc.subpath
@@ -25,32 +26,32 @@ locals {
     ]) : combo.name => combo
   }
 
-  li_fixed_policies = {
-    for svc_name, svc in local.li_services :
+  infrastructure_fixed_policies = {
+    for svc_name, svc in local.infrastructure_services :
     "read-ltc-infrastructure-${svc_name}" => { sub = svc.subpath }
     if length(svc.envs) == 0
   }
 }
 
-resource "vault_policy" "ltc_infrastructure_read" {
-  for_each = local.li_env_policies
+resource "vault_policy" "ltc_infrastructure_read_env" {
+  for_each = local.infrastructure_env_policies
   name     = each.key
   policy   = <<EOT
 # [RO] ltc-infrastructure ${each.value.sub}/${each.value.env} — KV v2
-path "ltc-infrastructure/metadata/+/${each.value.sub}/${each.value.env}"     { capabilities = ["list"] }
-path "ltc-infrastructure/metadata/+/${each.value.sub}/${each.value.env}/*"   { capabilities = ["list"] }
-path "ltc-infrastructure/data/+/${each.value.sub}/${each.value.env}/*"       { capabilities = ["read"] }
+path "ltc-infrastructure/metadata/${each.value.sub}/${each.value.env}"     { capabilities = ["list"] }
+path "ltc-infrastructure/metadata/${each.value.sub}/${each.value.env}/*"   { capabilities = ["list"] }
+path "ltc-infrastructure/data/${each.value.sub}/${each.value.env}/*"       { capabilities = ["read"] }
 EOT
 }
 
-resource "vault_policy" "ltc_infrastructure_read_fixed" {
-  for_each = local.li_fixed_policies
+resource "vault_policy" "ltc_infrastructure_read" {
+  for_each = local.infrastructure_fixed_policies
   name     = each.key
   policy   = <<EOT
 # [RO] ltc-infrastructure ${each.value.sub} — KV v2
-path "ltc-infrastructure/metadata/+/${each.value.sub}"     { capabilities = ["list"] }
-path "ltc-infrastructure/metadata/+/${each.value.sub}/*"   { capabilities = ["list"] }
-path "ltc-infrastructure/data/+/${each.value.sub}/*"       { capabilities = ["read"] }
+path "ltc-infrastructure/metadata/${each.value.sub}"     { capabilities = ["list"] }
+path "ltc-infrastructure/metadata/${each.value.sub}/*"   { capabilities = ["list"] }
+path "ltc-infrastructure/data/${each.value.sub}/*"       { capabilities = ["read"] }
 EOT
 }
 
