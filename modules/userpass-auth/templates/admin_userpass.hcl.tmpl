@@ -1,0 +1,4 @@
+# Administer userpass auth
+path "auth/${userpass_mount}/*" {
+  capabilities = ["create","read","update","delete","list"]
+}

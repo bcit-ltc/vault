@@ -1,0 +1,5 @@
+## Allow Userpass users to update their own passwords
+path "auth/${userpass_mount}/users/{{identity.entity.aliases.${userpass_accessor}.name}}" {
+  capabilities = ["update"]
+  allowed_parameters = { "password" = [] }
+}

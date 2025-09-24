@@ -1,0 +1,21 @@
+# OSX trash
+.DS_Store
+
+# Local .terraform directories
+.terraform/
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# Local tfvars terraform.tfvars
+**/*.tfvars
+
+# Remove sensitive data
+**/*secrets.*
+identities.yaml
+clusters.yaml
+apps.yaml
+
+# Remove research module
+**/research/

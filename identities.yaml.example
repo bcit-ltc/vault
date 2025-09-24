@@ -1,0 +1,32 @@
+# Identity source-of-truth
+#   - rename to `identities.yaml` and update references
+
+entities:
+
+  jane_doe:
+    name: "Jane Doe"
+    object_id: "56fabbbb-xxxx-yyyy-zzzz-2baaaaaaaaaa"  # Azure AD 'oid'; leave "" or omit to skip alias
+
+groups:
+
+  aad_team_ops:
+    type: external
+    metadata: {
+      source_group_name: "aad-group-name",
+      source_object_id: "babbbbbbb-xxxx-yyyy-zzzz-8e5e7aaaaaaa"
+    }
+    alias_object_id: "babbbbbbb-xxxx-yyyy-zzzz-8e5e7aaaaaaa"
+    policies: []
+
+
+  admin:
+    type: internal
+    metadata: { version: "3" }
+    policies:
+      - admin-approle
+      - admin-sops
+      - admin-transit
+    members:
+      entities:
+        - jane_doe
+      groups:   [aad_team_ops]

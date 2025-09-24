@@ -1,0 +1,7 @@
+# Example template that uses the mount accessor
+path "secrets/data/users/{{identity.entity.aliases.${accessor}.metadata.upn}}/*" {
+  capabilities = ["create", "update", "read", "delete", "list"]
+}
+path "secrets/metadata/users/{{identity.entity.aliases.${accessor}.metadata.upn}}/*" {
+  capabilities = ["list"]
+}

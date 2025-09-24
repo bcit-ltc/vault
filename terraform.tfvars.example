@@ -1,0 +1,33 @@
+tenant_id            = "aaaaaaaa-bbbb-cccc-dddd-123456789012"
+subscription_id      = "01234567-xxxx-yyyy-zzzz-aaaaaaaaaaaa"   # LTC subscription
+vault_addr           = "https://vault.example.com:8200"
+vault_token          = "hvs.ucccg39gWA5s012345678901"       # root token
+oidc_credentials_path = "secrets/oidc-auth-credentials"
+allowed_redirect_uris = [
+    "http://localhost:8250/oidc/callback",    # required by CLI
+    "https://vault.example.com:8200/ui/vault/auth/oidc/oidc/callback",
+  ]
+oidc_clients = {
+
+  # grafana = {
+  #   redirect_uris         = [
+  #     "https://grafana.example.org/login/generic_oauth",
+  #   ]
+  #   # authorize all internal groups (or pick a subset)
+  #   assignment_group_ids  = values(module.identities.group_ids_internal)
+  # }
+
+  # example of a client that allows all identities (rare; set explicitly)
+  # docs_portal = {
+  #   redirect_uris = ["https://docs.example.org/oidc/callback"]
+  #   allow_all     = true
+  # }
+
+}
+
+clusters = {
+  cluster0X = {
+    host        = "https://k8s-api-endpoint.local:6443"
+    current_env = "latest"
+  }
+}
