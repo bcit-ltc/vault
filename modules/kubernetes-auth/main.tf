@@ -36,7 +36,9 @@ resource "vault_kubernetes_auth_backend_role" "app_roles" {
 
   token_policies = concat(
     var.common_policies,
-    ["read-apps-${each.value.app}-${each.value.env}"]
+    ["read-apps-${each.value.app}-${each.value.env}"],
+    ["read-db-${each.value.app}"],
+
   )
 
   depends_on = [

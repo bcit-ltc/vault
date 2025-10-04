@@ -72,6 +72,24 @@ module "approle_auth" {
   approle_secretid_roles = ["read-ltc-infrastructure-ssl-certificates"]
 }
 
+# Database management
+module "postgresql" {
+  source = "./modules/databases/postgresql"
+
+  db_mount_path         = "postgres"
+  postgresql_databases  = var.postgresql_databases
+
+  # Re-use envs declared in the clusters variable
+  envs           = distinct([for _, c in var.clusters : c.current_env])
+
+  # existing inputs you already have:
+  pg_host        = var.pg_host
+  pg_port        = var.pg_port
+  admin_username = var.postgresql_admin_username
+  admin_password = var.postgresql_admin_password
+  manage_mount   = true
+}
+
 # Token management
 module "tokens" {
   source                = "./modules/tokens"

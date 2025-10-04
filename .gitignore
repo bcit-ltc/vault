@@ -19,3 +19,6 @@ apps.yaml
 
 # Remove research module
 **/research/
+
+# Remove inactive modules
+**/inactive/*

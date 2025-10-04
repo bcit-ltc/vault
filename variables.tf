@@ -80,6 +80,30 @@ variable "clusters" {
   }))
 }
 
+variable "postgresql_admin_username" {
+  type = string
+}
+
+variable "postgresql_admin_password" {
+  type = string
+  sensitive = true
+}
+
+variable "postgresql_databases" {
+  type = list(string)
+}
+
+variable "pg_host" {
+  description = "PostgreSQL host"
+  type        = string
+}
+
+variable "pg_port" {
+  description = "PostgreSQL port"
+  type        = number
+  default     = 5432
+}
+
 variable "apps" {
   description = "List of app names to create k8s auth roles for"
   type        = list(string)
