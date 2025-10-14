@@ -1,43 +1,57 @@
-# One read policy per DB role in var.postgresql_databases
-# Build (db × env) pairs for per-env policy names
-locals {
-  db_env_pairs = {
-    for p in setproduct(var.postgresql_databases, var.envs) :
-    "${p[0]}-${p[1]}" => { db = p[0], env = p[1] }
-  }
+# Read policies per (app, env):
+# name:  read-<mount-prefix>-<app>-<env>
+# path:  <mount-prefix>-<env>/creds/<app>-<env>
+
+resource "vault_policy" "read_db_app_env" {
+  for_each = local.app_env_pairs
+
+  name = format(
+    "read-%s-%s-%s",
+    var.db_mount_prefix,
+    lower(trimspace(each.value.app)),
+    each.value.env
+  )
+
+  policy = format(
+    "path \"%s/creds/%s\" {\n  capabilities = [\"read\"]\n}\n",
+    vault_mount.postgres_db[each.value.env].path,
+    each.value.role
+  )
 }
 
-# # One READ policy per (db, env): read-db-<db>-<env>
-# resource "vault_policy" "app_db_read" {
-#   for_each = local.db_env_pairs
+# Admin for Postgres secret backend (create/update roles/config)
+locals {
+  # Flatten to a simple list of mount path strings
+  db_mounts = tolist(values(local.mounts))
+}
 
-#   name   = "read-db-${each.value.db}-${each.value.env}"
-#   policy = <<-EOT
-#   # Allow dynamic DB creds for role "${each.value.db}"
-#   path "${var.db_mount_path}/creds/${each.value.db}" {
-#     capabilities = ["read"]
-#   }
-#   EOT
-# }
-
-# (Optional) admin policy for managing the database engine (unchanged)
+# Full CRUD over connections/roles, can rotate root, cannot mint creds
 resource "vault_policy" "admin_postgresql" {
   name   = "admin-postgresql"
-  policy = <<-EOT
-  path "${var.db_mount_path}/*" {
-    capabilities = ["create","read","update","delete","list"]
-  }
-  EOT
+  policy = join("\n", [
+    for m in local.db_mounts : <<-EOT
+      # ----- Admin for ${m} -----
+      # Manage database connections (config) under this mount
+      path "${m}/config/*"       { capabilities = ["create","read","update","delete","list"] }
+
+      # Manage dynamic roles
+      path "${m}/roles"          { capabilities = ["list"] }
+      path "${m}/roles/*"        { capabilities = ["create","read","update","delete","list"] }
+
+      # Manage static roles
+      path "${m}/static-roles"   { capabilities = ["list"] }
+      path "${m}/static-roles/*" { capabilities = ["create","read","update","delete","list"] }
+
+      # Maintenance: rotate root credentials for connections
+      path "${m}/rotate-root/*"  { capabilities = ["update"] }
+
+      # (Optional) Allow tuning of the mount itself
+      # path "sys/mounts/${m}"      { capabilities = ["read","update"] }
+
+      # Intentionally DO NOT allow minting credentials:
+      # - "${m}/creds/*"
+      # - "${m}/static-creds/*"
+    EOT
+  ])
 }
 
-# Flat (env-less) policy per DB so kubernetes-auth roles that expect "read-db-<app>" work
-resource "vault_policy" "read_db_app" {
-  for_each = toset(var.postgresql_databases)
-
-  name   = "read-db-${each.value}"
-  policy = <<-EOT
-  path "${var.db_mount_path}/creds/${each.value}" {
-    capabilities = ["read"]
-  }
-  EOT
-}

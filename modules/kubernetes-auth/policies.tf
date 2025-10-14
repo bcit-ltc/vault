@@ -9,12 +9,6 @@
 #   - read-apps-<app>-<env> policies (scoped read across the app/env path on KV v2)
 #   - read-kubernetes and admin-kubernetes policies for auth backends
 
-variable "acl_policy_mount" {
-  description = "KV mount name for app ACL policies (KV v2 logical path, no /data/)"
-  type        = string
-  default     = "apps"
-}
-
 # Per-app, per-env READ policy (used by k8s auth roles)
 # Reuse local.app_envs from locals.tf
 resource "vault_policy" "read_app_env" {
@@ -29,7 +23,7 @@ path "${var.acl_policy_mount}/data/${each.value.app}/${each.value.env}/*"     { 
 EOT
 }
 
-# Read-only visibility into Kubernetes auth backends (handy for debugging)
+# Read-only visibility into Kubernetes auth backends (for debugging)
 resource "vault_policy" "read_kubernetes" {
   name   = "read-kubernetes"
   policy = <<EOT
@@ -48,4 +42,15 @@ path "auth/kubernetes*/config"  { capabilities = ["create","read","update"] }
 path "auth/kubernetes*/role"    { capabilities = ["list"] }
 path "auth/kubernetes*/role/*"  { capabilities = ["create","read","update","delete","list"] }
 EOT
+}
+
+# Read-only policy for postgres init secrets (KV v2)
+resource "vault_policy" "read_postgres_init" {
+  name   = "read-ltc-infrastructure-postgres"
+  policy = <<-EOT
+    # List & read postgres init secrets under ltc-infrastructure/postgres/*
+    path "ltc-infrastructure/metadata/postgres"     { capabilities = ["list", "read"] }
+    path "ltc-infrastructure/metadata/postgres/*"   { capabilities = ["list", "read"] }
+    path "ltc-infrastructure/data/postgres/*"       { capabilities = ["read"] }
+  EOT
 }

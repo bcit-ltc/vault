@@ -73,11 +73,17 @@ variable "oidc_clients" {
 }
 
 variable "clusters" {
-  description = "Map of cluster name -> { host, current_env }"
+  description = "Kubernetes clusters keyed by name. current_env is unique per cluster; workload_connection is the hostname/IP used for DB connections."
   type = map(object({
-    host        = string
-    current_env = string
+    host                 = string
+    workload_connection  = string
+    current_env          = string
   }))
+}
+
+variable "pg_port" {
+  description = "PostgreSQL NodePort used by Vault to reach each env's CNPG cluster."
+  type        = number
 }
 
 variable "postgresql_admin_username" {
@@ -85,23 +91,13 @@ variable "postgresql_admin_username" {
 }
 
 variable "postgresql_admin_password" {
-  type = string
+  type      = string
   sensitive = true
 }
 
 variable "postgresql_databases" {
-  type = list(string)
-}
-
-variable "pg_host" {
-  description = "PostgreSQL host"
-  type        = string
-}
-
-variable "pg_port" {
-  description = "PostgreSQL port"
-  type        = number
-  default     = 5432
+  description = "List of app identifiers; one role per app per env"
+  type        = list(string)
 }
 
 variable "apps" {

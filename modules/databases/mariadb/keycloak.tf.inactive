@@ -1,0 +1,78 @@
+# Roles for database secrets engine
+#
+
+# review - review doesn't use dynamic database credentials
+#
+
+
+# latest
+#
+# connection/policy is specific to each app because of the service name; credentials rotated after init
+resource "vault_database_secret_backend_connection" "keycloak-database-mariadb-latest" {
+  backend           = vault_mount.database-mariadb.path
+  name              = "keycloak-database-mariadb-latest"
+  allowed_roles     = ["keycloak-mariadb-credentials-latest"]
+  verify_connection = false
+  mysql {
+    connection_url = "{{username}}:{{password}}@tcp(keycloak-mariadb-service-latest:3306)/keycloak"
+    username       = "root"
+    password       = "rootpassword"
+  }
+}
+resource "vault_policy" "read-keycloak-mariadb-credentials-latest" {
+  name   = "read-keycloak-mariadb-credentials-latest"
+  policy = <<EOT
+# [RO] - Dynamic db credentials for applications
+#
+path "database-mariadb/static-creds/keycloak-mariadb-credentials-latest" { capabilities = [ "read" ] }
+EOT
+}
+
+
+# stable
+#
+# connection/policy is specific to each app because of the service name; credentials rotated after init
+resource "vault_database_secret_backend_connection" "keycloak-database-mariadb-stable" {
+  backend           = vault_mount.database-mariadb.path
+  name              = "keycloak-database-mariadb-stable"
+  allowed_roles     = ["keycloak-mariadb-credentials-stable"]
+  verify_connection = false
+  mysql {
+    connection_url = "{{username}}:{{password}}@tcp(keycloak-mariadb-service-stable:3306)/keycloak"
+    username       = "root"
+    password       = "rootpassword"
+  }
+}
+resource "vault_policy" "read-keycloak-mariadb-credentials-stable" {
+  name   = "read-keycloak-mariadb-credentials-stable"
+  policy = <<EOT
+# [RO] - Dynamic db credentials for applications
+#
+path "database-mariadb/static-creds/keycloak-mariadb-credentials-stable" { capabilities = [ "read" ] }
+EOT
+}
+
+
+# # web
+# #
+# # connection/policy is specific to each app because of the service name; credentials rotated after init
+# resource "vault_database_secret_backend_connection" "keycloak-database-mariadb-web" {
+#   backend           = vault_mount.database-mariadb.path
+#   name              = "keycloak-database-mariadb-web"
+#   allowed_roles     = ["keycloak-mariadb-credentials-web"]
+#   verify_connection = false
+#   mysql {
+#     connection_url = "{{username}}:{{password}}@tcp(keycloak-mariadb-service-web:3306)/keycloak"
+#     username       = "root"
+#     password       = "rootpassword"
+#   }
+# }
+# resource "vault_policy" "read-keycloak-mariadb-credentials-web" {
+#   name   = "read-keycloak-mariadb-credentials-web"
+#   policy = <<EOT
+# # [RO] - Dynamic db credentials for applications
+# #
+# path "database-mariadb/static-creds/keycloak-mariadb-credentials-web" { capabilities = [ "read" ] }
+# EOT
+# }
+

@@ -37,12 +37,32 @@ resource "vault_kubernetes_auth_backend_role" "app_roles" {
   token_policies = concat(
     var.common_policies,
     ["read-apps-${each.value.app}-${each.value.env}"],
-    ["read-db-${each.value.app}"],
-
+    ["read-postgresql-${each.value.app}-${each.value.env}"],
   )
 
   depends_on = [
     vault_auth_backend.k8s_backends,
     vault_kubernetes_auth_backend_config.per_env,
+  ]
+}
+
+# Roles for postgres init: one role per ENV: postgres-vault-auth-{env}
+resource "vault_kubernetes_auth_backend_role" "postgres_init" {
+  for_each = local.env_to_backend
+
+  backend   = each.value                                 # e.g., "kubernetes-stable"
+  role_name = "postgres-vault-auth-${each.key}"          # e.g., postgres-vault-auth-stable
+
+  bound_service_account_namespaces  = ["postgres"]
+  bound_service_account_names       = ["pg-core-${each.key}"]
+  audience                          = each.key            # e.g., "stable", "latest"
+
+  token_ttl         = var.token_ttl_seconds
+  token_bound_cidrs = var.token_bound_cidrs
+  token_policies    = [vault_policy.read_postgres_init.name]
+
+  depends_on = [
+    vault_auth_backend.k8s_backends,
+    vault_kubernetes_auth_backend_config.per_env, # ensure backend is configured
   ]
 }

@@ -1,53 +1,109 @@
 locals {
-  ttl_1h  = 3600       # 1 hour
-  ttl_24h = 86400      # 24 hours
-  backend_path = var.manage_mount ? vault_mount.postgres_db[0].path : var.db_mount_path
-  app_db_names = { for app in var.postgresql_databases : app => replace(app, "-", "_") }
-}
+  # Canonicalized env slugs
+  envs = distinct([for e in var.envs : lower(trimspace(e))])
 
-resource "vault_mount" "postgres_db" {
-  count = var.manage_mount ? 1 : 0
-  path  = var.db_mount_path
-  type  = "database"
-  lifecycle {
-    prevent_destroy = true   # nice safety so we don’t nuke the engine by accident
+  # Mount path per env: <prefix>-<env>
+  mounts = { for e in local.envs : e => "${var.db_mount_prefix}-${e}" }
+
+  # Strict per-env connection params
+  env_conn = {
+    for e in local.envs : e => {
+      host = var.pg_connections[e].host
+      port = var.pg_connections[e].port
+    }
+  }
+
+  # App database identifiers safe for PG (for schema/group names)
+  app_db_names = { for app in var.postgresql_databases : app => replace(app, "-", "_") }
+
+  # (app,env) pairs → role name is "<app>-<env>"
+  app_env_pairs = {
+    for pair in flatten([
+      for app in var.postgresql_databases : [
+        for e in local.envs : {
+          key    = "${app}-${e}"
+          app    = app
+          app_pg = replace(app, "-", "_")
+          env    = e
+          role   = "${app}-${e}"
+        }
+      ]
+    ]) : pair.key => pair
   }
 }
 
+# One mount per environment
+resource "vault_mount" "postgres_db" {
+  for_each = local.mounts
+  path     = each.value
+  type     = "database"
+}
+
+# One connection per environment
 resource "vault_database_secret_backend_connection" "postgres_connection" {
-  for_each      = toset(var.postgresql_databases)
-  backend       = local.backend_path
-  name          = "pg-core-${each.value}"
-  allowed_roles = ["${each.value}"]
+  for_each      = local.env_conn
+  backend       = vault_mount.postgres_db[each.key].path
+  name          = "${var.connection_name}-${each.key}"
+  plugin_name   = var.plugin_name
+  allowed_roles = ["*"]
 
   postgresql {
-    # use the admin DB for verification
-    connection_url = "postgresql://{{username}}:{{password}}@${var.pg_host}:${var.pg_port}/postgres?sslmode=require"
-    username       = var.admin_username
-    password       = var.admin_password
+    connection_url          = "postgresql://{{username}}:{{password}}@${each.value.host}:${each.value.port}/${var.admin_database}?sslmode=require"
+    username                = var.admin_username
+    password                = var.admin_password
     password_authentication = "scram-sha-256"
     max_open_connections    = 8
     max_connection_lifetime = 300
   }
 }
 
+# One dynamic role per (app, env)
 resource "vault_database_secret_backend_role" "postgres_role" {
-  for_each     = toset(var.postgresql_databases)
-  backend      = local.backend_path
-  name         = "${each.value}"
-  db_name      = vault_database_secret_backend_connection.postgres_connection[each.value].name
-  default_ttl  = local.ttl_1h
-  max_ttl      = local.ttl_24h
+  for_each    = local.app_env_pairs
+
+  backend     = vault_mount.postgres_db[each.value.env].path
+  name        = each.value.role
+  db_name     = vault_database_secret_backend_connection.postgres_connection[each.value.env].name
+  default_ttl = var.default_ttl_seconds
+  max_ttl     = var.max_ttl_seconds
 
   creation_statements = [
     "CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';",
-    "GRANT obot_app TO \"{{name}}\";",
-    "ALTER ROLE \"{{name}}\" IN DATABASE obot SET search_path = obot, public;"
+    "GRANT ${each.value.app_pg}${var.app_role_suffix} TO \"{{name}}\";",
+    "ALTER ROLE \"{{name}}\" IN DATABASE ${each.value.app_pg} SET search_path = ${each.value.app_pg}, public;"
   ]
 
-  # Nice cleanup when creds expire/revoke
   revocation_statements = [
-    "REVOKE obot_app FROM \"{{name}}\";",
+    "REVOKE ${each.value.app_pg}${var.app_role_suffix} FROM \"{{name}}\";",
     "DROP ROLE IF EXISTS \"{{name}}\";"
   ]
+}
+
+# Manager policy+token role (always created)
+resource "vault_policy" "manager" {
+  name   = "manage-${var.db_mount_prefix}"
+  policy = join("\n", concat(
+    ["path \"sys/mounts\" { capabilities = [\"read\"] }"],
+    flatten([
+      for p in [for _, v in vault_mount.postgres_db : v.path] : [
+        format("path \"sys/mounts/%s\" { capabilities = [\"read\"] }", p),
+        format("path \"sys/mounts/%s/*\" { capabilities = [\"read\"] }", p),
+        format("path \"%s/config\" { capabilities = [\"list\"] }", p),
+        format("path \"%s/config/*\" { capabilities = [\"create\",\"update\",\"read\",\"delete\",\"list\"] }", p),
+        format("path \"%s/roles\" { capabilities = [\"list\"] }", p),
+        format("path \"%s/roles/*\" { capabilities = [\"create\",\"update\",\"read\",\"delete\",\"list\"] }", p),
+        format("path \"sys/leases/revoke/%s/*\" { capabilities = [\"update\"] }", p),
+        format("path \"sys/leases/lookup/%s/*\" { capabilities = [\"update\"] }", p)
+      ]
+    ])
+  ))
+}
+
+resource "vault_token_auth_backend_role" "manager" {
+  role_name           = var.manager_role_name
+  orphan              = true
+  renewable           = true
+  allowed_policies    = [vault_policy.manager.name]
+  disallowed_policies = ["default"]
+  token_period        = var.manager_token_period
 }

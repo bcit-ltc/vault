@@ -63,3 +63,9 @@ variable "k8s_auth_path_prefix" {
     error_message = "k8s_auth_path_prefix must NOT include '/data/'. Use the logical mount path only (KV v2 provider rewrites internally)."
   }
 }
+
+variable "acl_policy_mount" {
+  description = "KV mount name for app ACL policies (KV v2 logical path, no /data/)"
+  type        = string
+  default     = "apps"
+}

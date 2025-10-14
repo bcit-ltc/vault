@@ -1,30 +1,77 @@
-# Manage the Vault DB secrets engine mount here
-variable "manage_mount" {
-    type = bool
-    default = true
+# Prefix for per-env mounts: <prefix>-<env>
+variable "db_mount_prefix" {
+  type        = string
+  default     = "postgresql"
 }
-variable "db_mount_path" {
-    type = string
-    default = "postgres"
-}
-variable "pg_host" {
-    type = string
-}
-variable "pg_port" {
-    type = number
-}
-variable "admin_username" {
-    type = string
-}
-variable "admin_password" {
-    type = string
-    sensitive = true
-}
-variable "postgresql_databases" {
-    type = list(string)
-}
+
+# Environments (e.g., ["latest","stable"])
 variable "envs" {
-  description = "Environments to suffix policy names with (e.g., [\"stable\"])"
-  type        = list(string)
-  default     = ["stable"]
+  type = list(string)
+}
+
+# App identifiers (used for schema & group names; "-" normalized to "_")
+variable "postgresql_databases" {
+  type = list(string)
+}
+
+# Strict per-env connection map (no fallback)
+variable "pg_connections" {
+  type = map(object({
+    host = string
+    port = number
+  }))
+}
+
+# Admin creds used for all env connections
+variable "admin_username" {
+  type = string
+}
+
+variable "admin_password" {
+  type      = string
+  sensitive = true
+}
+
+# Fixed DB & plugin settings (kept as vars in case they ever need to change)
+variable "admin_database" {
+  type    = string
+  default = "postgres"
+}
+
+variable "plugin_name" {
+  type    = string
+  default = "postgresql-database-plugin"
+}
+
+variable "connection_name" {
+  description = "Prefix for connection objects; actual names are <prefix>-<env>"
+  type        = string
+  default     = "pg-core"
+}
+
+variable "app_role_suffix" {
+  description = "Suffix for per-app group roles (e.g., <app>_app)"
+  type        = string
+  default     = "_app"
+}
+
+variable "default_ttl_seconds" {
+  type    = number
+  default = 86400       # 1 day
+}
+
+variable "max_ttl_seconds" {
+  type    = number
+  default = 2592000     # 30 days
+}
+
+# Manager role defaults (always created; no toggle)
+variable "manager_role_name" {
+  type    = string
+  default = "vault_manager"
+}
+
+variable "manager_token_period" {
+  type    = number
+  default = 86400
 }

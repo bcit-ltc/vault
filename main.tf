@@ -63,7 +63,7 @@ module "approle_auth" {
     # ci-role = {
     #   token_policies        = ["default","read-apps","write-external"]
     #   token_ttl_seconds     = 900
-    #   token_bound_cidrs     = ["192.68.68.0/24"]
+    #   token_bound_cidrs     = ["192.168.0.0/24"]
     #   token_no_default_policy = true
     # }
   }
@@ -76,23 +76,34 @@ module "approle_auth" {
 module "postgresql" {
   source = "./modules/databases/postgresql"
 
-  db_mount_path         = "postgres"
-  postgresql_databases  = var.postgresql_databases
+  # Environments should match cluster environments (unique, lowercased)
+  envs = distinct([for _, c in var.clusters : lower(trimspace(c.current_env))])
+  # envs = ["stable", "latest"]
 
-  # Re-use envs declared in the clusters variable
-  envs           = distinct([for _, c in var.clusters : c.current_env])
+  # Mounts will be: postgresql-<env>
+  db_mount_prefix      = "postgresql"
 
-  # existing inputs you already have:
-  pg_host        = var.pg_host
-  pg_port        = var.pg_port
+  # Apps -> roles created per env
+  postgresql_databases = var.postgresql_databases
+
+  # Derive per-env connection from clusters
+  pg_connections = {
+    for _, c in var.clusters :
+    lower(trimspace(c.current_env)) => {
+      host = c.workload_connection
+      port = var.pg_port
+    }
+  }
+
+  # DB admin creds used for the connection (same across envs)
   admin_username = var.postgresql_admin_username
   admin_password = var.postgresql_admin_password
-  manage_mount   = true
 }
 
 # Token management
 module "tokens" {
-  source                = "./modules/tokens"
+  source             = "./modules/tokens"
+  token_bound_cidrs    = var.token_bound_cidrs
 }
 
 # SOPS and transit engines

@@ -1,0 +1,45 @@
+# Roles for database secrets engine
+
+# latest
+# - connection/policy is specific to each app because of the service name; credentials rotated after init
+resource "vault_database_secret_backend_connection" "corgi-database-mariadb-latest" {
+  backend           = vault_mount.database-mariadb.path
+  name              = "corgi-database-mariadb-latest"
+  allowed_roles     = ["corgi-mariadb-credentials-latest"]
+  verify_connection = false
+  mysql {
+    connection_url = "{{username}}:{{password}}@tcp(corgi-mariadb-service-latest:3306)/corgi"
+    username       = "root"
+    password       = "rootpassword"
+  }
+}
+resource "vault_policy" "read-corgi-mariadb-credentials-latest" {
+  name   = "read-corgi-mariadb-credentials-latest"
+  policy = <<EOT
+# [RO] - Dynamic db credentials for applications
+#
+path "database-mariadb/static-creds/corgi-mariadb-credentials-latest" { capabilities = [ "read" ] }
+EOT
+}
+
+# stable
+# - connection/policy is specific to each app because of the service name; credentials rotated after init
+resource "vault_database_secret_backend_connection" "corgi-database-mariadb-stable" {
+  backend           = vault_mount.database-mariadb.path
+  name              = "corgi-database-mariadb-stable"
+  allowed_roles     = ["corgi-mariadb-credentials-stable"]
+  verify_connection = false
+  mysql {
+    connection_url = "{{username}}:{{password}}@tcp(corgi-mariadb-service-stable:3306)/corgi"
+    username       = "root"
+    password       = "rootpassword"
+  }
+}
+resource "vault_policy" "read-corgi-mariadb-credentials-stable" {
+  name   = "read-corgi-mariadb-credentials-stable"
+  policy = <<EOT
+# [RO] - Dynamic db credentials for applications
+#
+path "database-mariadb/static-creds/corgi-mariadb-credentials-stable" { capabilities = [ "read" ] }
+EOT
+}

@@ -6,7 +6,7 @@ locals {
     "approle-token-create" = {
       period   = local.ttl_4h
       policies = ["admin-approle-get-secretid"]
-      cidrs    = local.bound_cidrs
+      cidrs    = var.token_bound_cidrs
     }
 
     # Metrics admin (no CIDR binding here by design)
@@ -20,7 +20,7 @@ locals {
     "use-transit-gitops-key" = {
       period   = local.ttl_30d
       policies = ["default", "use-transit-gitops-key"]
-      cidrs    = local.bound_cidrs
+      cidrs    = var.token_bound_cidrs
     }
   }
 }
