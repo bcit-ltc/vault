@@ -11,6 +11,7 @@ locals {
     { name = "read-ltc-infrastructure-ssl-certificates", access = "read", mount = "ltc-infrastructure", subpaths = ["ssl-certificates/*"] },
     { name = "write-ltc-infrastructure", access = "write", mount = "ltc-infrastructure", subpaths = ["*"] },
     { name = "admin-ltc-infrastructure", access = "admin", mount = "ltc-infrastructure", subpaths = ["*"] },
+    { name = "read-ltc-infrastructure-flux-github-webhook-token", access = "read", mount = "ltc-infrastructure", subpaths = ["flux/github-webhook-token*"] },
   ]
 }
 
@@ -22,4 +23,15 @@ resource "vault_policy" "kv" {
     mount    = each.value.mount
     subpaths = each.value.subpaths
   })
+}
+
+# Read-only policy for postgres init secrets (KV v2)
+resource "vault_policy" "read_postgres_init" {
+  name   = "read-ltc-infrastructure-postgres"
+  policy = <<-EOT
+    # List & read postgres init secrets under ltc-infrastructure/postgres/*
+    path "ltc-infrastructure/metadata/postgres"     { capabilities = ["list", "read"] }
+    path "ltc-infrastructure/metadata/postgres/*"   { capabilities = ["list", "read"] }
+    path "ltc-infrastructure/data/postgres/*"       { capabilities = ["read"] }
+  EOT
 }

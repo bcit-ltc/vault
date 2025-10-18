@@ -43,14 +43,3 @@ path "auth/kubernetes*/role"    { capabilities = ["list"] }
 path "auth/kubernetes*/role/*"  { capabilities = ["create","read","update","delete","list"] }
 EOT
 }
-
-# Read-only policy for postgres init secrets (KV v2)
-resource "vault_policy" "read_postgres_init" {
-  name   = "read-ltc-infrastructure-postgres"
-  policy = <<-EOT
-    # List & read postgres init secrets under ltc-infrastructure/postgres/*
-    path "ltc-infrastructure/metadata/postgres"     { capabilities = ["list", "read"] }
-    path "ltc-infrastructure/metadata/postgres/*"   { capabilities = ["list", "read"] }
-    path "ltc-infrastructure/data/postgres/*"       { capabilities = ["read"] }
-  EOT
-}
