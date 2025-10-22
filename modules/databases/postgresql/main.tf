@@ -83,7 +83,9 @@ resource "vault_database_secret_backend_role" "postgres_role" {
 resource "vault_policy" "manager" {
   name   = "manage-${var.db_mount_prefix}"
   policy = join("\n", concat(
-    ["path \"sys/mounts\" { capabilities = [\"read\"] }"],
+    ["path \"sys/mounts\" { capabilities = [\"read\"] }",
+     "path \"auth/token/lookup-self\" { capabilities = [\"read\"] }",
+     "path \"auth/token/renew-self\" { capabilities = [\"update\"] }"],
     flatten([
       for p in [for _, v in vault_mount.postgres_db : v.path] : [
         format("path \"sys/mounts/%s\" { capabilities = [\"read\"] }", p),
@@ -93,7 +95,8 @@ resource "vault_policy" "manager" {
         format("path \"%s/roles\" { capabilities = [\"list\"] }", p),
         format("path \"%s/roles/*\" { capabilities = [\"create\",\"update\",\"read\",\"delete\",\"list\"] }", p),
         format("path \"sys/leases/revoke/%s/*\" { capabilities = [\"update\"] }", p),
-        format("path \"sys/leases/lookup/%s/*\" { capabilities = [\"update\"] }", p)
+        format("path \"sys/leases/lookup/%s/*\" { capabilities = [\"update\"] }", p),
+        format("path \"sys/leases/renew/%s/*\" { capabilities = [\"update\"] }", p)
       ]
     ])
   ))

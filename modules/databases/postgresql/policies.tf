@@ -12,11 +12,21 @@ resource "vault_policy" "read_db_app_env" {
     each.value.env
   )
 
-  policy = format(
-    "path \"%s/creds/%s\" {\n  capabilities = [\"read\"]\n}\n",
-    vault_mount.postgres_db[each.value.env].path,
-    each.value.role
-  )
+  policy = join("\n", [
+    format(
+      "path \"%s/creds/%s\" {\n  capabilities = [\"read\"]\n}\n",
+      format("%s-%s", var.db_mount_prefix, each.value.env),
+      format("%s-%s", lower(trimspace(each.value.app)), each.value.env)
+    ),
+    # Allow lease renewals (both generic and mount-prefixed)
+    "path \"sys/leases/renew\" { capabilities = [\"update\"] }",
+    "path \"sys/leases/renew/*\" { capabilities = [\"update\"] }",
+    format("path \"sys/leases/renew/%s/*\" { capabilities = [\"update\"] }", format("%s-%s", var.db_mount_prefix, each.value.env)),
+
+    # Allow the client token to renew itself
+    "path \"auth/token/lookup-self\" { capabilities = [\"read\"] }",
+    "path \"auth/token/renew-self\"  { capabilities = [\"update\"] }"
+  ])
 }
 
 # Admin for Postgres secret backend (create/update roles/config)
@@ -54,4 +64,3 @@ resource "vault_policy" "admin_postgresql" {
     EOT
   ])
 }
-
