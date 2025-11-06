@@ -25,6 +25,8 @@ cluster_addr = "https://127.0.0.1:8201"
 log_format = "json"
 log_level = "error"
 
+plugin_directory = "/opt/vault/plugins"
+
 telemetry {
   disable_hostname = true
   enable_hostname_label = true
