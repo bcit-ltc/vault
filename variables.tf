@@ -133,3 +133,15 @@ variable "k8s_auth_path_prefix" {
   description = "Base Vault path for Kubernetes cluster auth materials"
   type        = string
 }
+
+variable "private_legacy_apps" {
+  description = "Apps that should receive the GitHub private tokens policy."
+  type        = list(string)
+  default     = []
+}
+
+variable "github_private_tokens_policy" {
+  description = "Policy name for GitHub private tokens access."
+  type        = string
+  default     = "read-ltc-infrastructure-github-private-tokens"
+}

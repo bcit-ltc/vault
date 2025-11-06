@@ -43,6 +43,7 @@ module "kubernetes_auth" {
   token_ttl_seconds    = var.token_ttl_seconds
   k8s_auth_path_prefix = var.k8s_auth_path_prefix
   apps_grouped         = var.apps_grouped
+  private_legacy_apps  = var.private_legacy_apps
 }
 
 # Automated machine-based authentication

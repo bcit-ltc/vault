@@ -26,7 +26,6 @@ resource "vault_kubernetes_auth_backend_role" "app_roles" {
   backend   = each.value.backend
   role_name = "${each.value.app}-vault-auth-${each.value.env}"
 
-  # Bind to parent namespace if defined; otherwise bind to the app's own namespace
   bound_service_account_namespaces = [lookup(local.app_parent_map, each.value.app, each.value.app)]
   bound_service_account_names      = [each.value.app]
   audience                         = each.value.env
@@ -38,6 +37,7 @@ resource "vault_kubernetes_auth_backend_role" "app_roles" {
     var.common_policies,
     ["read-apps-${each.value.app}-${each.value.env}"],
     ["read-postgresql-${each.value.app}-${each.value.env}"],
+    lookup(local.app_to_extra_policies, each.value.app, [])
   )
 
   depends_on = [
@@ -87,3 +87,13 @@ resource "vault_kubernetes_auth_backend_role" "flux" {
     vault_kubernetes_auth_backend_config.per_env, # ensure backend is configured
   ]
 }
+
+# Additional role for github private tokens
+locals {
+  # For each app, build a list of extra policies to add (empty if not targeted)
+  app_to_extra_policies = {
+    for a in local.all_apps :
+    a => (contains(var.private_legacy_apps, a) ? [var.github_private_tokens_policy] : [])
+  }
+}
+
