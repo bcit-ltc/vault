@@ -55,7 +55,7 @@ resource "vault_generic_endpoint" "github_config" {
 
 data "vault_policy_document" "github_token" {
   rule {
-    path         = "${var.mount_path}/token"   # or "github/token" if fixed
+    path         = "${var.mount_path}/token"
     capabilities = ["read","create","update"]
   }
 }
@@ -63,4 +63,14 @@ data "vault_policy_document" "github_token" {
 resource "vault_policy" "write_github_private_tokens" {
   name   = "write-github-private-tokens"
   policy = data.vault_policy_document.github_token.hcl
+}
+
+# Admin policy for plugin
+resource "vault_policy" "admin_github_private_tokens" {
+  name   = "admin-github-private-tokens"
+  policy = <<EOT
+# Manage GitHub token secrets
+path "${var.mount_path}"    { capabilities = ["read"] }
+path "${var.mount_path}/*"  { capabilities = ["create","read","update","delete"] }
+EOT
 }
