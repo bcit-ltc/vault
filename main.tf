@@ -118,6 +118,18 @@ module "userpass_auth" {
   userpass_accessor     = module.userpass_auth.userpass_accessor
 }
 
+# Plugin - GitHub token generator
+module "vault_plugin_secrets_github" {
+  source = "./modules/plugins/vault-plugin-secrets-github"
+
+  vault_github_secrets_plugin_app_credentials = var.vault_github_secrets_plugin_app_credentials
+
+  base_url                    = "https://api.github.com"
+  exclude_repository_metadata  = true
+  mount_path                   = "github"
+  policy_name                  = "write-github-private-tokens"
+}
+
 # Vault and Azure backend state storage configuration
 # - see https://learn.microsoft.com/en-us/azure/developer/terraform/store-state-in-azure-storage?tabs=azure-cli
 terraform {
@@ -126,7 +138,7 @@ terraform {
   required_providers {
     vault = {
       source  = "hashicorp/vault"
-      version = ">= 3.18.0"
+      version = "~> 5.0"
     }
   }
 

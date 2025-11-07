@@ -79,5 +79,5 @@ variable "private_legacy_apps" {
 variable "github_private_tokens_policy" {
   description = "Policy name to add to selected apps."
   type        = string
-  default     = "read-ltc-infrastructure-github-private-tokens"
+  default     = "write-github-private-tokens"
 }
