@@ -7,6 +7,7 @@ locals {
     { name = "private-team",       description = "Team secrets - only accessible by team members", version = 2 },
     { name = "external",           description = "Secrets for services or stand-alone projects outside the LTC", version = 2 },
     { name = "ltc-infrastructure", description = "Inventory and configuration secrets", version = 2 },
+    { name = "3rd-party-services", description = "Vendor and 3rd party application or system secrets", version = 2 },
   ]
 }
 

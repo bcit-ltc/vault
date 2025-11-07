@@ -7,6 +7,8 @@ locals {
     { name = "admin-apps",  access = "admin", mount = "apps",    subpaths = ["*"] },
     { name = "write-external", access = "write", mount = "external", subpaths = ["*"] },
     { name = "admin-external", access = "admin", mount = "external", subpaths = ["*"] },
+    { name = "write-3rd-party-services", access = "write", mount = "3rd-party-services", subpaths = ["*"] },
+    { name = "admin-3rd-party-services", access = "admin", mount = "3rd-party-services", subpaths = ["*"] },
     { name = "read-ltc-infrastructure-inventory", access = "read", mount = "ltc-infrastructure", subpaths = ["inventory"] },
     { name = "read-ltc-infrastructure-ssl-certificates", access = "read", mount = "ltc-infrastructure", subpaths = ["ssl-certificates/*"] },
     { name = "write-ltc-infrastructure", access = "write", mount = "ltc-infrastructure", subpaths = ["*"] },

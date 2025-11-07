@@ -1,6 +1,8 @@
 # Admin policies
 module "admin_system" {
-  source = "./modules/admin-policies"
+  source          = "./modules/admin-policies"
+  identities_yaml = file("${path.root}/identities.yaml")
+  # mount        = "private-team"
 }
 
 # KV secrets engines
@@ -13,6 +15,10 @@ module "identities" {
   source               = "./modules/identities"
   identities_yaml_path = "./identities.yaml"
   oidc_auth_accessor   = module.oidc_auth.oidc_auth_accessor
+
+  extra_group_policies = {
+    for k, v in module.admin_system.team_private_policy_names : k => [v]
+  }
 }
 
 # OIDC login + Vault-as-IdP with multiple downstream clients

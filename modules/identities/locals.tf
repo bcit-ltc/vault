@@ -1,7 +1,7 @@
 locals {
-  cfg      = yamldecode(file(abspath("${path.root}/${var.identities_yaml_path}")))
-  _entities_raw = try(local.cfg.entities, {})
-  groups   = try(local.cfg.groups, {})
+  cfg            = yamldecode(file(abspath("${path.root}/${var.identities_yaml_path}")))
+  _entities_raw  = try(local.cfg.entities, {})
+  groups         = try(local.cfg.groups, {})
 
   # Normalize entities: always have a list "policies" (default [])
   entities = {
@@ -71,7 +71,7 @@ resource "terraform_data" "validate_yaml" {
       ])
       error_message = "External groups must not declare 'members'. Membership comes from the IdP via alias mapping."
     }
-    # policies must be a list of non-empty strings
+    # policies must be a list of non-empty strings for ENTITIES (group policies validated implicitly)
     precondition {
       condition = alltrue([
         for e in values(local.entities) :
