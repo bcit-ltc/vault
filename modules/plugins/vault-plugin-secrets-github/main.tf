@@ -1,12 +1,3 @@
-# Create ephemeral, finely-scoped @github access tokens using @hashicorp Vault. 
-# https://github.com/martinbaillie/vault-plugin-secrets-github
-
-# Requirements:
-# 1. Vault plugin directory configured in vault.hcl
-# 2. Compiled binary exists in Vault's plugin directory (e.g. /opt/vault/plugins)
-# 3. Binary SHA256SUM matches the local file
-# 4. GitHub App configured (app_id, private_key, and installation_id)
-
 # Pull config from Vault:
 #   mount = ltc-infrastructure
 #   name  = github/vault-github-secrets-plugin-app-credentials
