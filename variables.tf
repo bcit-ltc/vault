@@ -134,7 +134,7 @@ variable "k8s_auth_path_prefix" {
   type        = string
 }
 
-variable "private_legacy_apps" {
+variable "private_apps" {
   description = "Apps that should receive the GitHub private tokens policy."
   type        = list(string)
   default     = []

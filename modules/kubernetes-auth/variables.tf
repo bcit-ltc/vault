@@ -70,7 +70,7 @@ variable "acl_policy_mount" {
   default     = "apps"
 }
 
-variable "private_legacy_apps" {
+variable "private_apps" {
   description = "Apps that should receive the GitHub private tokens policy across all envs."
   type        = list(string)
   default     = []

@@ -93,7 +93,7 @@ locals {
   # For each app, build a list of extra policies to add (empty if not targeted)
   app_to_extra_policies = {
     for a in local.all_apps :
-    a => (contains(var.private_legacy_apps, a) ? [var.github_private_tokens_policy] : [])
+    a => (contains(var.private_apps, a) ? [var.github_private_tokens_policy] : [])
   }
 }
 
