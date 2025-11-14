@@ -146,10 +146,10 @@ variable "github_private_tokens_policy" {
   default     = "write-github-private-tokens"
 }
 
-variable "vault_github_secrets_plugin_app_credentials" {
-  description = "Path to the Vault generic secret that stores plugin and app credentials"
-  type        = string
-}
+# variable "vault_github_secrets_plugin_app_credentials" {
+#   description = "Path to the Vault generic secret that stores plugin and app credentials"
+#   type        = string
+# }
 
 variable "base_url" {
   description = "GitHub API base URL (defaults to https://api.github.com)"
