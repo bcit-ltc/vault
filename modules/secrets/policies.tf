@@ -14,6 +14,7 @@ locals {
     { name = "write-ltc-infrastructure", access = "write", mount = "ltc-infrastructure", subpaths = ["*"] },
     { name = "admin-ltc-infrastructure", access = "admin", mount = "ltc-infrastructure", subpaths = ["*"] },
     { name = "read-ltc-infrastructure-flux-github-webhook-token", access = "read", mount = "ltc-infrastructure", subpaths = ["flux/github-webhook-token*"] },
+    { name = "read-ltc-infrastructure-github-gh-private-oci-token", access = "read", mount = "ltc-infrastructure", subpaths = ["github/gh-private-oci-token*"] },
   ]
 }
 
