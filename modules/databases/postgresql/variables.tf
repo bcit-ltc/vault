@@ -22,15 +22,12 @@ variable "pg_connections" {
   }))
 }
 
-# Admin creds used for all env connections
-variable "admin_username" {
-  type = string
+variable "admin_passwords" {
+  description = "Per-environment Postgres admin passwords, keyed by environment (e.g. stable, latest)."
+  type        = map(string)
+  sensitive   = true
 }
 
-variable "admin_password" {
-  type      = string
-  sensitive = true
-}
 
 # Fixed DB & plugin settings (kept as vars in case they ever need to change)
 variable "admin_database" {
@@ -68,7 +65,7 @@ variable "max_ttl_seconds" {
 # Manager role defaults (always created; no toggle)
 variable "manager_role_name" {
   type    = string
-  default = "vault_manager"
+  default = "db_root_owner"
 }
 
 variable "manager_token_period" {

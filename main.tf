@@ -82,31 +82,12 @@ module "approle_auth" {
 # Database management
 module "postgresql" {
   source = "./modules/databases/postgresql"
-
-  # Environments should match cluster environments (unique, lowercased)
-  envs = distinct([for _, c in var.clusters : lower(trimspace(c.current_env))])
-  # envs = ["stable", "latest"]
-
-  # Mounts will be: postgresql-<env>
-  db_mount_prefix      = "postgresql"
-
-  # Apps -> roles created per env
+  envs               = local.envs
+  db_mount_prefix    = "postgresql"
+  pg_connections     = local.pg_connections
+  admin_passwords    = local.admin_passwords
   postgresql_databases = var.postgresql_databases
-
-  # Derive per-env connection from clusters
-  pg_connections = {
-    for _, c in var.clusters :
-    lower(trimspace(c.current_env)) => {
-      host = c.workload_connection
-      port = var.pg_port
-    }
-  }
-
-  # DB admin creds used for the connection (same across envs)
-  admin_username = var.postgresql_admin_username
-  admin_password = var.postgresql_admin_password
 }
-
 # Token management
 module "tokens" {
   source             = "./modules/tokens"
