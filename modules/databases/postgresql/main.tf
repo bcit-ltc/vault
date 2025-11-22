@@ -2,7 +2,7 @@ locals {
   # Canonicalized env slugs
   envs = distinct([for e in var.envs : lower(trimspace(e))])
 
-  # Mount path per env: <prefix>-<env>
+  # Mount path per env: <prefix>-<env>, e.g. "postgresql-stable"
   mounts = { for e in local.envs : e => "${var.db_mount_prefix}-${e}" }
 
   # Strict per-env connection params
@@ -14,6 +14,7 @@ locals {
   }
 
   # App database identifiers safe for PG (for schema/group names)
+  # e.g. "qcon-api" -> "qcon_api"
   app_db_names = { for app in var.postgresql_databases : app => replace(app, "-", "_") }
 
   # (app,env) pairs → role name is "<app>-<env>"
@@ -23,16 +24,16 @@ locals {
         for e in local.envs : {
           key    = "${app}-${e}"
           app    = app
-          app_pg = replace(app, "-", "_")
+          app_pg = replace(app, "-", "_")  # DB/schema name
           env    = e
-          role   = "${app}-${e}"
+          role   = "${app}-${e}"           # Vault DB role name
         }
       ]
     ]) : pair.key => pair
   }
 }
 
-# One mount per environment
+# One mount per environment (e.g. "postgresql-stable", "postgresql-latest")
 resource "vault_mount" "postgres_db" {
   for_each = local.mounts
   path     = each.value
@@ -58,6 +59,16 @@ resource "vault_database_secret_backend_connection" "postgres_connection" {
 }
 
 # One dynamic role per (app, env)
+#
+# Contract with CNPG + bootstrap job:
+# - Each app has:
+#     DB:        <app_pg>            (e.g. "qcon_api")
+#     APP_ROLE:  <app_pg><suffix>    (e.g. "qcon_api_app")
+#   created by the bootstrap job using db_root_owner as the DB owner.
+#
+# - These dynamic roles are short-lived login roles that:
+#   - are granted into APP_ROLE
+#   - have search_path set to the app schema for the app DB
 resource "vault_database_secret_backend_role" "postgres_role" {
   for_each    = local.app_env_pairs
 
@@ -67,13 +78,29 @@ resource "vault_database_secret_backend_role" "postgres_role" {
   default_ttl = var.default_ttl_seconds
   max_ttl     = var.max_ttl_seconds
 
+  # On first issue: create a short-lived login role and add it to the app group role
   creation_statements = [
+    # Short-lived login, expiry tied to Vault lease
     "CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';",
+    # Membership in app group role, e.g. qcon_api_app
     "GRANT ${each.value.app_pg}${var.app_role_suffix} TO \"{{name}}\";",
+    # Make sure search_path matches the app schema in the app database
     "ALTER ROLE \"{{name}}\" IN DATABASE ${each.value.app_pg} SET search_path = ${each.value.app_pg}, public;"
   ]
 
+  # On lease renewal: keep Postgres role metadata aligned with the renewed lease
+  renew_statements = [
+    # Refresh password + VALID UNTIL to match renewed Vault lease
+    "ALTER ROLE \"{{name}}\" WITH PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';",
+    # (Re)assert search_path, in case it was changed out-of-band
+    "ALTER ROLE \"{{name}}\" IN DATABASE ${each.value.app_pg} SET search_path = ${each.value.app_pg}, public;"
+  ]
+
+  # On revoke/expiry: cleanly drop the short-lived login role
   revocation_statements = [
+    # Kill any active sessions using this role before dropping it
+    "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE usename = '{{name}}';",
+    # Remove membership then drop the role
     "REVOKE ${each.value.app_pg}${var.app_role_suffix} FROM \"{{name}}\";",
     "DROP ROLE IF EXISTS \"{{name}}\";"
   ]
@@ -83,9 +110,11 @@ resource "vault_database_secret_backend_role" "postgres_role" {
 resource "vault_policy" "manager" {
   name   = "manage-${var.db_mount_prefix}"
   policy = join("\n", concat(
-    ["path \"sys/mounts\" { capabilities = [\"read\"] }",
-     "path \"auth/token/lookup-self\" { capabilities = [\"read\"] }",
-     "path \"auth/token/renew-self\" { capabilities = [\"update\"] }"],
+    [
+      "path \"sys/mounts\" { capabilities = [\"read\"] }",
+      "path \"auth/token/lookup-self\" { capabilities = [\"read\"] }",
+      "path \"auth/token/renew-self\" { capabilities = [\"update\"] }"
+    ],
     flatten([
       for p in [for _, v in vault_mount.postgres_db : v.path] : [
         format("path \"sys/mounts/%s\" { capabilities = [\"read\"] }", p),
