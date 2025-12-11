@@ -106,6 +106,7 @@ module "userpass_auth" {
 }
 
 # Plugin - GitHub token generator
+# Currently disabled because the api does not support fine-grained token leases
 # module "vault_plugin_secrets_github" {
 #   source = "./modules/plugins/vault-plugin-secrets-github"
 
@@ -135,6 +136,6 @@ terraform {
     use_azuread_auth     = true
     use_cli              = true
 
-    # blob key = vault
+    key = "vault/terraform.tfstate"
   }
 }
