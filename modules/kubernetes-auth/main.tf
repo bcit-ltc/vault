@@ -88,6 +88,27 @@ resource "vault_kubernetes_auth_backend_role" "flux" {
   ]
 }
 
+# Roles for tailscale-operator: one role per ENV: tailscale-operator-vault-auth-{env}
+resource "vault_kubernetes_auth_backend_role" "tailscale-operator" {
+  for_each = local.env_to_backend
+
+  backend   = each.value                                  # e.g., "kubernetes-stable"
+  role_name = "tailscale-operator-vault-auth-${each.key}" # e.g., tailscale-operator-vault-auth-stable
+
+  bound_service_account_namespaces  = ["tailscale"]
+  bound_service_account_names       = ["tailscale-operator-oauth-sa-${each.key}"]
+  audience                          = each.key            # e.g., "stable", "latest"
+
+  token_ttl         = var.token_ttl_seconds
+  token_bound_cidrs = var.token_bound_cidrs
+  token_policies    = ["read-ltc-infrastructure-tailscale-oauth-credentials"]
+
+  depends_on = [
+    vault_auth_backend.k8s_backends,
+    vault_kubernetes_auth_backend_config.per_env, # ensure backend is configured
+  ]
+}
+
 # Additional role for github private tokens
 locals {
   # For each app, build a list of extra policies to add (empty if not targeted)
