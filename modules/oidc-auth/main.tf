@@ -68,9 +68,9 @@ resource "vault_identity_oidc_provider" "this" {
   https_enabled = true
   issuer_host   = var.issuer_host
 
-  allowed_client_ids = [
+  allowed_client_ids = sort([
     for c in vault_identity_oidc_client.client : c.client_id
-  ]
+  ])
 
   scopes_supported = [
     vault_identity_oidc_scope.groups.name,

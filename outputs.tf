@@ -20,15 +20,15 @@ output "kubernetes_auths" {
   value = module.kubernetes_auth.env_to_backend
 }
 
-output "cluster_hosts" {
+output "kubernetes_hosts" {
   value = module.kubernetes_auth.cluster_hosts
 }
 
 ## PostgreSQL
-output "vault_connections" {
+output "vault_db_connections" {
   value = module.postgresql.connections
 }
 
-output "vault_roles" {
+output "vault_db_roles" {
   value = module.postgresql.roles
 }

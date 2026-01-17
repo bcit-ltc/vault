@@ -38,8 +38,8 @@ resource "vault_policy" "admin_kubernetes" {
   name   = "admin-kubernetes"
   policy = <<EOT
 # Manage Kubernetes auth config and roles
-path "auth/kubernetes*/config"  { capabilities = ["create","read","update"] }
-path "auth/kubernetes*/role"    { capabilities = ["list"] }
-path "auth/kubernetes*/role/*"  { capabilities = ["create","read","update","delete","list"] }
+path "auth/kubernetes*"  { capabilities = ["create","read","update"] }
+path "auth/kubernetes*"    { capabilities = ["list"] }
+path "auth/kubernetes*"  { capabilities = ["create","read","update","delete","list"] }
 EOT
 }

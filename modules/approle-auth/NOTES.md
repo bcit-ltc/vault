@@ -36,7 +36,7 @@ Roles are created using the values in `approle-roles.yaml`. Every AppRole role h
 1. Use the `role_id` and `secret_id` to login. Authentication provides a token which can be used to retrieve secrets from `/external`.
 
     ```bash
-    export VAULT_TOKEN="$(vault write -format=json auth/approle/login role_id=${ROLE_ID} secret_id=${SECRET_ID} jq -r '.auth.client_token')" && echo $VAULT_TOKEN
+    export VAULT_TOKEN="$(vault write -format=json auth/approle/login role_id=${ROLE_ID} secret_id=${SECRET_ID} | jq -r '.auth.client_token')" && echo $VAULT_TOKEN
     ```
 
 1. Use the approle token to read a secret (in this example, at /web-apps/external/wordpress-ltc-on-point)

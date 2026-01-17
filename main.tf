@@ -58,6 +58,7 @@ module "approle_auth" {
   token_ttl_seconds     = 3600
   token_max_ttl_seconds = 86400
   token_bound_cidrs     = var.token_bound_cidrs
+  token_no_default_policy = var.token_no_default_policy
 
   # Override/add roles here, policies per role
   approle_roles = {

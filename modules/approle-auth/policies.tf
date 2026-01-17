@@ -7,11 +7,11 @@ path "auth/approle/*" { capabilities = ["create","read","update","delete","list"
 EOT
 }
 
-# Allow Ansible to generate an approle secretID
-resource "vault_policy" "admin-ansible-get-secretid" {
-  name   = "admin-ansible-get-secretid"
+# Allow users to generate an approle secretID
+resource "vault_policy" "admin-approle-get-secretid" {
+  name   = "admin-approle-get-secretid"
   policy = <<EOT
-# Allow Ansible to generate AppRole SecretIDs for selected roles
+# Allow users to generate AppRole SecretIDs for selected roles
 %{ for r in var.approle_secretid_roles ~}
 path "auth/approle/role/${r}/secret-id" { capabilities = ["update"] }
 %{ endfor ~}

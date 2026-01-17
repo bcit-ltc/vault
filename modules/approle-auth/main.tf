@@ -12,7 +12,7 @@ resource "vault_approle_auth_backend_role" "roles" {
   backend                 = vault_auth_backend.approle.path
   role_name               = each.key
   token_policies          = each.value.token_policies
-  token_no_default_policy = try(each.value.token_no_default_policy, true)
+  token_no_default_policy = try(each.value.token_no_default_policy, var.token_no_default_policy)
 
   token_ttl     = try(each.value.token_ttl_seconds,     var.token_ttl_seconds)
   token_max_ttl = try(each.value.token_max_ttl_seconds, var.token_max_ttl_seconds)

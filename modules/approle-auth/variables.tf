@@ -1,3 +1,8 @@
+variable "token_no_default_policy" {
+  description = "Whether to disable the default policy for AppRole tokens."
+  type        = bool
+  default     = false
+}
 # Roles with overridable names and policies.
 variable "approle_roles" {
   description = <<-EOT

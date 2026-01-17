@@ -1,3 +1,8 @@
+variable "token_no_default_policy" {
+  description = "Whether to disable the default policy for AppRole tokens."
+  type        = bool
+  default     = false
+}
 variable "vault_addr" {
   description = "Vault server address (e.g., https://vault.example.com:8200)"
   type        = string

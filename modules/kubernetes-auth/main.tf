@@ -96,7 +96,7 @@ resource "vault_kubernetes_auth_backend_role" "tailscale-operator" {
   role_name = "tailscale-operator-vault-auth-${each.key}" # e.g., tailscale-operator-vault-auth-stable
 
   bound_service_account_namespaces  = ["tailscale"]
-  bound_service_account_names       = ["tailscale-operator-oauth-sa-${each.key}"]
+  bound_service_account_names       = ["tailscale-operator-oauth-sa"]
   audience                          = each.key            # e.g., "stable", "latest"
 
   token_ttl         = var.token_ttl_seconds
