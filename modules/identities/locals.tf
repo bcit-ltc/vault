@@ -1,3 +1,4 @@
+# Used in conjunction with the project root `identities.yaml`
 locals {
   cfg            = yamldecode(file(abspath("${path.root}/${var.identities_yaml_path}")))
   _entities_raw  = try(local.cfg.entities, {})

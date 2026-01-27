@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD046 -->
 # About Secrets
 
-Secrets are PUT into Vault using the CLI or the Web UI - rather than by Terraform - so that they do not persist in state files in plain text.
+Secrets are PUT into Vault using the CLI or the Web UI so that they do not persist in state files.
 
 Use a token with appropriate authorization to put a secret.
 

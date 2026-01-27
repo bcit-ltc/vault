@@ -1,4 +1,4 @@
-# Embedded policies for KV engines (apps + external)
+# Policies for KV engines (apps + external)
 
 locals {
   kv_policies = [

@@ -3,7 +3,8 @@
 Minimal module to configure Kubernetes auth method. Apps are granted access to a cluster's auth method for each environment.
 
 ```txt
-qcon => creates role and policy for "read-apps-qcon-stable" => configures auth for "stable" cluster (and follows the same pattern for other envs and clusters)
+qcon => creates role and policy for "read-apps-qcon-stable"
+- configures auth for "stable" cluster (and follows the same pattern for other envs and clusters)
 ```
 
 ## Inputs

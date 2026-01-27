@@ -1,6 +1,6 @@
-# KV secrets engines (loop-driven)
+# KV secrets engines
 
-# Edit this list to add/remove mounts. Each item is name/description/version.
+# List of mounts. Each item is name/description/version.
 locals {
   mounts = [
     { name = "apps",               description = "Secrets used within apps", version = 2 },
@@ -9,11 +9,6 @@ locals {
     { name = "ltc-infrastructure", description = "Inventory and configuration secrets", version = 2 },
     { name = "3rd-party-services", description = "Vendor and 3rd party application or system secrets", version = 2 },
   ]
-}
-
-# Index by mount name
-locals {
-  mounts_by_name = { for m in local.mounts : m.name => m }
 }
 
 resource "vault_mount" "kv_mount" {
@@ -26,4 +21,9 @@ resource "vault_mount" "kv_mount" {
 
   # Avoid nuking a mount (and all its data) via Terraform
   lifecycle { prevent_destroy = true }
+}
+
+# Index by mount name
+locals {
+  mounts_by_name = { for m in local.mounts : m.name => m }
 }
