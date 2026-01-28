@@ -48,6 +48,6 @@ A service account token is required to authenticate with the kubernetes auth bac
     vault kv put -mount="ltc-infrastructure" "clusters/${CLUSTER}" ca_pem="$CA_PEM" token_reviewer_jwt="$SA_TOKEN"
     ```
 
-You could use the Vault UI to paste the values into the secret path and the Access -> Kubernetes Auth JWT token field.
+    > You could use the Vault UI to paste the values into the secret path and the Access -> Kubernetes Auth JWT token field.
 
 Run `terraform apply` to configure the Kubernetes auth backend.

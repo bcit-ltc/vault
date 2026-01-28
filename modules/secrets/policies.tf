@@ -15,7 +15,6 @@ locals {
     { name = "admin-ltc-infrastructure", access = "admin", mount = "ltc-infrastructure", subpaths = ["*"] },
     { name = "read-ltc-infrastructure-flux-github-webhook-token", access = "read", mount = "ltc-infrastructure", subpaths = ["flux/github-webhook-token*"] },
     { name = "read-ltc-infrastructure-github-gh-private-oci-token", access = "read", mount = "ltc-infrastructure", subpaths = ["github/gh-private-oci-token*"] },
-    { name = "read-ltc-infrastructure-tailscale-oauth-credentials", access = "read", mount = "ltc-infrastructure", subpaths = ["tailscale/oauth-trust-credentials*"] },
     { name = "read-ltc-infrastructure-longhorn-azblob-credentials", access = "read", mount = "ltc-infrastructure", subpaths = ["longhorn/azblob-credentials*"] },
   ]
 }
