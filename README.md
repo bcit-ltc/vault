@@ -9,20 +9,16 @@ This project uses Terraform to deploy Vault resources; backend state is stored r
 - Terraform >= 1.0
 - Vault CLI
 - Azure CLI for state storgage
+- Alternatively, install `nix` and `direnv` to load the required executables
 
 ### Optional
 
-- if using OIDC auth, Azure Entra ID app pre-configuration required
 - if using Kubernetes auth, Kubernetes CLI and cluster required
 
 ## Getting Started
 
-> [!IMPORTANT]
-> Modules should be applied incrementally because some modules retrieve values from Vault.
-> Start by applying the KV secrets engine module, loading the required secrets, and then applying the remaining modules.
-
 > [!NOTE]
-> Comment out the entire terraform block in `main.tf` until a local state is established.
+> Comment out the modules in `main.tf` until a local state is established.
 >
 > When a backend is configured, state can be migrated with:
 >
@@ -53,14 +49,7 @@ terraform apply -target=module.secrets.vault_mount.kv_mount -auto-approve
 - `oidc_credentials_path` -> seeks Entra ID app `client_id` and `client_secret`
 - kubernetes_auth `ca_pem` and `token_reviewer_jwt`
 
-## Applying Special Modules
-
-Start by enabling the `secrets` engine
-
-```bash
-terraform plan
-terraform apply
-```
+## Module descriptions
 
 ### Identity module
 
@@ -70,7 +59,7 @@ This module sets up groups and entities based on the configuration in the root `
 
 > See [modules/kubernetes-auth/NOTES.md](modules/kubernetes-auth/NOTES.md).
 
-This module configures Kubernetes access to Vault. See `terraform.tfvars.example` for how to use.
+This module configures Kubernetes access to Vault. See `terraform.tfvars.example` for information about configuration.
 
 1. Load the required secrets into the KV engine at (`${k8s_auth_path_prefix}/clusters/${cluster0X}`)
 
@@ -89,7 +78,7 @@ This module configures Kubernetes access to Vault. See `terraform.tfvars.example
     ```
 
 1. Uncomment the module in `main.tf`
-1. `plan` and `apply` the config
+1. `terraform plan` and `terraform apply` the config
 
 ### OIDC auth
 
@@ -110,7 +99,7 @@ This module configures Kubernetes access to Vault. See `terraform.tfvars.example
     ```
 
 1. Uncomment the module in `main.tf`
-1. `plan` and `apply` the config
+1. `terraform plan` and `terraform apply` the config
 
 ## About
 

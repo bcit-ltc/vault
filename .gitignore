@@ -8,17 +8,6 @@
 *.tfstate
 *.tfstate.*
 
-# Local tfvars terraform.tfvars
-**/*.tfvars
-
 # Remove sensitive data
-**/*secrets.*
+**/*.tfvars
 identities.yaml
-clusters.yaml
-apps.yaml
-
-# Remove research module
-**/research/
-
-# Remove inactive modules
-**/inactive/*

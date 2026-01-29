@@ -49,24 +49,24 @@ module "kubernetes_auth" {
   token_ttl_seconds    = var.token_ttl_seconds
   k8s_auth_path_prefix = var.k8s_auth_path_prefix
   apps_grouped         = var.apps_grouped
-  private_apps  = var.private_apps
+  private_apps         = var.private_apps
 }
 
 # Automated machine-based authentication
 module "approle_auth" {
-  source                = "./modules/approle-auth"
-  token_ttl_seconds     = 3600
-  token_max_ttl_seconds = 86400
-  token_bound_cidrs     = var.token_bound_cidrs
+  source                  = "./modules/approle-auth"
+  token_ttl_seconds       = 3600
+  token_max_ttl_seconds   = 86400
+  token_bound_cidrs       = var.token_bound_cidrs
   token_no_default_policy = var.token_no_default_policy
 
   # Override/add roles here, policies per role
   approle_roles = {
-    read-external = { 
-      token_policies = ["default","read-external"]
+    read-external = {
+      token_policies = ["default", "read-external"]
     }
-    read-ltc-infrastructure-ssl-certificates = { 
-      token_policies = ["default","read-ltc-infrastructure-ssl-certificates"]
+    read-ltc-infrastructure-ssl-certificates = {
+      token_policies = ["default", "read-ltc-infrastructure-ssl-certificates"]
     }
     # ci-role = {
     #   token_policies        = ["default","read-apps","write-external"]
@@ -82,32 +82,32 @@ module "approle_auth" {
 
 # Database management
 module "postgresql" {
-  source = "./modules/databases/postgresql"
-  envs               = local.envs
-  db_mount_prefix    = "postgresql"
-  pg_connections     = local.pg_connections
-  admin_passwords    = local.admin_passwords
+  source               = "./modules/databases/postgresql"
+  envs                 = local.envs
+  db_mount_prefix      = "postgresql"
+  pg_connections       = local.pg_connections
+  admin_passwords      = local.admin_passwords
   postgresql_databases = var.postgresql_databases
 }
 # Token management
 module "tokens" {
-  source             = "./modules/tokens"
-  token_bound_cidrs    = var.token_bound_cidrs
+  source            = "./modules/tokens"
+  token_bound_cidrs = var.token_bound_cidrs
 }
 
 # SOPS and transit engines
 module "transit" {
-  source                = "./modules/transit"
+  source = "./modules/transit"
 }
 
 # Username and password authentication
 module "userpass_auth" {
-  source                = "./modules/userpass-auth"
-  userpass_accessor     = module.userpass_auth.userpass_accessor
+  source            = "./modules/userpass-auth"
+  userpass_accessor = module.userpass_auth.userpass_accessor
 }
 
 # Plugin - GitHub token generator
-# Currently disabled because the api does not support fine-grained token leases
+# - currently disabled because the api does not support fine-grained token leases
 # module "vault_plugin_secrets_github" {
 #   source = "./modules/plugins/vault-plugin-secrets-github"
 
