@@ -16,7 +16,9 @@ locals {
     { name = "read-ltc-infrastructure-flux-github-webhook-token", access = "read", mount = "ltc-infrastructure", subpaths = ["flux/github-webhook-token*"] },
     { name = "read-ltc-infrastructure-github-gh-private-oci-token", access = "read", mount = "ltc-infrastructure", subpaths = ["github/gh-private-oci-token*"] },
     { name = "read-ltc-infrastructure-longhorn-azblob-credentials", access = "read", mount = "ltc-infrastructure", subpaths = ["longhorn/azblob-credentials*"] },
-  ]
+    { name = "read-apps-shared-db-credentials", access = "read",  mount = "apps",    subpaths = ["shared/db-credentials*"] },
+
+]
 }
 
 resource "vault_policy" "kv" {

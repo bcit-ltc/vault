@@ -1,8 +1,8 @@
 # Kubernetes auth backends: one per ENV (named kubernetes-{env})
 resource "vault_auth_backend" "k8s_backends" {
-  for_each    = local.env_to_backend         # keys are envs
+  for_each    = local.env_to_backend # keys are envs
   type        = "kubernetes"
-  path        = each.value                   # e.g., "kubernetes-stable"
+  path        = each.value # e.g., "kubernetes-stable"
   description = "K8s auth for ${each.key}"
 }
 
@@ -46,24 +46,23 @@ resource "vault_kubernetes_auth_backend_role" "app_roles" {
   ]
 }
 
-# Roles for postgres: one role per ENV: postgres-vault-auth
-resource "vault_kubernetes_auth_backend_role" "postgres_init" {
+resource "vault_kubernetes_auth_backend_role" "postgres_shared_db_credentials" {
   for_each = local.env_to_backend
 
-  backend   = each.value                                 # e.g., "kubernetes-stable"
-  role_name = "postgres-vault-auth"          # e.g., postgres-vault-auth-stable
+  backend   = each.value # e.g., "kubernetes-stable"
+  role_name = "cnpg-vault-auth"
 
-  bound_service_account_namespaces  = ["postgres"]
-  bound_service_account_names       = ["pg-core"]
-  audience                          = each.key            # e.g., "stable", "latest"
+  bound_service_account_namespaces = ["postgres"]
+  bound_service_account_names      = ["cnpg-sa"]
+  audience                         = each.key # e.g., "stable", "latest"
 
   token_ttl         = var.token_ttl_seconds
   token_bound_cidrs = var.token_bound_cidrs
-  token_policies    = ["read-ltc-infrastructure-postgres"]
+  token_policies    = ["read-apps-shared-db-credentials"]
 
   depends_on = [
     vault_auth_backend.k8s_backends,
-    vault_kubernetes_auth_backend_config.per_env, # ensure backend is configured
+    vault_kubernetes_auth_backend_config.per_env,
   ]
 }
 
@@ -71,12 +70,12 @@ resource "vault_kubernetes_auth_backend_role" "postgres_init" {
 resource "vault_kubernetes_auth_backend_role" "flux" {
   for_each = local.env_to_backend
 
-  backend   = each.value                                 # e.g., "kubernetes-stable"
-  role_name = "flux-vault-auth"              # e.g., flux-vault-auth-stable
+  backend   = each.value        # e.g., "kubernetes-stable"
+  role_name = "flux-vault-auth" # e.g., flux-vault-auth-stable
 
-  bound_service_account_namespaces  = ["flux-system"]
-  bound_service_account_names       = ["flux-service-account"]
-  audience                          = each.key            # e.g., "stable", "latest"
+  bound_service_account_namespaces = ["flux-system"]
+  bound_service_account_names      = ["flux-service-account"]
+  audience                         = each.key # e.g., "stable", "latest"
 
   token_ttl         = var.token_ttl_seconds
   token_bound_cidrs = var.token_bound_cidrs
@@ -92,12 +91,12 @@ resource "vault_kubernetes_auth_backend_role" "flux" {
 resource "vault_kubernetes_auth_backend_role" "longhorn-azblob" {
   for_each = local.env_to_backend
 
-  backend   = each.value                                 # e.g., "kubernetes-stable"
-  role_name = "longhorn-azblob-vault-auth"              # e.g., longhorn-azblob-vault-auth-stable
+  backend   = each.value                   # e.g., "kubernetes-stable"
+  role_name = "longhorn-azblob-vault-auth" # e.g., longhorn-azblob-vault-auth-stable
 
-  bound_service_account_namespaces  = ["longhorn-system"]
-  bound_service_account_names       = ["longhorn-azblob-sa"]
-  audience                          = each.key            # e.g., "stable", "latest"
+  bound_service_account_namespaces = ["longhorn-system"]
+  bound_service_account_names      = ["longhorn-azblob-sa"]
+  audience                         = each.key # e.g., "stable", "latest"
 
   token_ttl         = var.token_ttl_seconds
   token_bound_cidrs = var.token_bound_cidrs
