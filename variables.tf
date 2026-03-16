@@ -3,6 +3,21 @@ variable "token_no_default_policy" {
   type        = bool
   default     = false
 }
+
+variable "pki" {
+  description = "PKI configuration object"
+  type = object({
+    organization         = string
+    short_org            = string
+    country              = string
+    province             = string
+    locality             = string
+    ou                   = string
+    primary_ca_cert_path = string
+    allowed_domains      = list(string)
+  })
+}
+
 variable "vault_addr" {
   description = "Vault server address (e.g., https://vault.example.com:8200)"
   type        = string
@@ -43,7 +58,7 @@ variable "container_name" {
     condition     = can(regex("^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$", var.container_name))
     error_message = "container_name must be 3–63 chars, lowercase letters, numbers, hyphens; start/end alphanumeric."
   }
-  default     = "tfstate"
+  default = "tfstate"
 }
 
 variable "oidc_credentials_path" {
@@ -94,7 +109,7 @@ variable "pg_port" {
 }
 
 variable "postgresql_admin_username" {
-  type = string
+  type    = string
   default = "postgres"
 }
 

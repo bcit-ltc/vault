@@ -11,3 +11,8 @@
 # Remove sensitive data
 **/*.tfvars
 identities.yaml
+
+# temporary research
+research/
+modules/pki/*.crt
+modules/cert-auth/

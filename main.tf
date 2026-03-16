@@ -5,6 +5,19 @@ module "admin_system" {
   # mount        = "private-team"
 }
 
+# PKI module
+module "pki" {
+  source               = "./modules/pki"
+  organization         = var.pki.organization
+  short_org            = var.pki.short_org
+  country              = var.pki.country
+  province             = var.pki.province
+  locality             = var.pki.locality
+  ou                   = var.pki.ou
+  primary_ca_cert_path = var.pki.primary_ca_cert_path
+  allowed_domains      = var.pki.allowed_domains
+}
+
 # KV secrets engines
 module "secrets" {
   source = "./modules/secrets"
