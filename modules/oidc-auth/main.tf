@@ -10,12 +10,12 @@ resource "vault_jwt_auth_backend" "oidc" {
 }
 
 resource "vault_jwt_auth_backend_role" "default" {
-  backend               = vault_jwt_auth_backend.oidc.path
-  role_name             = "default"
-  role_type             = "oidc"
-  user_claim            = "oid"
+  backend    = vault_jwt_auth_backend.oidc.path
+  role_name  = "default"
+  role_type  = "oidc"
+  user_claim = "oid"
   # groups_claim        = "groups"
-  oidc_scopes           = ["profile", "email"]
+  oidc_scopes = ["profile", "email"]
 
   claim_mappings = {
     email              = "email"
@@ -34,11 +34,24 @@ resource "vault_identity_oidc_scope" "groups" {
   description = "List of Vault Identity group names."
   template    = "{\"groups\": {{identity.entity.groups.names}}}"
 }
-
 resource "vault_identity_oidc_scope" "user" {
   name        = "user"
   description = "Vault Identity entity name."
   template    = "{\"username\": {{identity.entity.name}}}"
+}
+resource "vault_identity_oidc_scope" "email" {
+  name        = "email"
+  description = "User email from OIDC alias metadata."
+  template    = <<-EOT
+    {"email": {{identity.entity.aliases.${data.vault_auth_backend.oidc.accessor}.metadata.email}}}
+  EOT
+}
+resource "vault_identity_oidc_scope" "profile" {
+  name        = "profile"
+  description = "User display name from OIDC alias metadata."
+  template    = <<-EOT
+    {"name": {{identity.entity.aliases.${data.vault_auth_backend.oidc.accessor}.metadata.name}}}
+  EOT
 }
 
 # Create an assignment per client so toggling allow_all does not destroy resources
@@ -75,5 +88,7 @@ resource "vault_identity_oidc_provider" "this" {
   scopes_supported = [
     vault_identity_oidc_scope.groups.name,
     vault_identity_oidc_scope.user.name,
+    vault_identity_oidc_scope.email.name,
+    vault_identity_oidc_scope.profile.name,
   ]
 }
