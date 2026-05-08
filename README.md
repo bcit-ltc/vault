@@ -1,4 +1,9 @@
 <!-- markdownlint-disable MD028 -->
+# 🧊 This project has been migrated to [bcit-tlu/vault](https://github.com/bcit-tlu/vault).
+
+The code remains available for historic purposes.
+
+---
 
 # HashiCorp Vault configured with Terraform
 
